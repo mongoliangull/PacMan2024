@@ -1,0 +1,28 @@
+class
+
+Object
+
+inherit Moving OBJ
+
+	inherit Pac-Man
+
+	inherit Ghost
+		inherit 4 ghosts
+			enum STATE { CHASE, SCATTER, FRIGHTENED, EATEN };
+			4개의 ghost에서 move function을 다르게 정의
+
+inherit Block
+
+inherit Dot
+	inherit  Large_Dot
+	inherit Small_Dot
+
+
+class
+Map
+
+main
+
+idle
+- collision detection
+- pac man과 ghost의 위치 업데이트
