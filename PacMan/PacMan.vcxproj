@@ -139,11 +139,28 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CollisionDetector.cpp" />
+    <ClCompile Include="CollisionHandler.cpp" />
+    <ClCompile Include="Light.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Map.cpp" />
+    <ClCompile Include="Material.cpp" />
+    <ClCompile Include="Shape3D.cpp" />
+    <ClCompile Include="Sphere.cpp" />
+    <ClCompile Include="Vector3f.cpp" />
+    <ClCompile Include="Vector4f.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CollisionDetector.h" />
+    <ClInclude Include="CollisionHandler.h" />
+    <ClInclude Include="Constants.h" />
+    <ClInclude Include="Light.h" />
     <ClInclude Include="Map.h" />
+    <ClInclude Include="Material.h" />
+    <ClInclude Include="Shape3D.h" />
+    <ClInclude Include="Sphere.h" />
+    <ClInclude Include="Vector3f.h" />
+    <ClInclude Include="Vector4f.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

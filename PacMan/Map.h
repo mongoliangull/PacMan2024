@@ -1,11 +1,9 @@
 #pragma once
-#include <GL/freeglut.h>
+#include "Constants.h"
+#include "Sphere.h"
+
 #include <array>
 #include <vector>
-
-const int MAP_WIDTH = 28;
-const int MAP_HEIGHT = 31;
-const int TILE_SIZE = 20;
 
 class Block {
 public:
@@ -14,28 +12,34 @@ public:
 
 	void setWidth(float w);
 	void setHeight(float h);
-	void setIsWall(int i);
+	void setIsPassable(bool i);
 
 	float getWidth() const;
 	float getHeight() const;
-	int getIsWall() const;
+	bool isPassable() const;
 
 	void draw() const;
+
 private:
 	float x, y, z;
 	float width, height;
-	int isWall;
+	bool bPassable;
 };
 
 class Map {
 public:
 	Map();
 
-	void createMap(const std::array<std::array<int, MAP_WIDTH>, MAP_HEIGHT>& idxTiles);
+	void createMap(const std::array<std::array<tileType, MAP_WIDTH>, MAP_HEIGHT>& idxTiles);
 
 	const Block& getBlock(int r, int c) const;
 
 	void draw() const;
+
+	void drawCoins() const;
+
 private:
 	std::array<std::array<Block, MAP_WIDTH>, MAP_HEIGHT> tiles;
+	std::vector<Coin> smallCoins;
+	std::vector<Coin> bigCoins;
 };
