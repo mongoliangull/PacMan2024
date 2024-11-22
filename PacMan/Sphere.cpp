@@ -181,6 +181,10 @@ void PacMan::setCollided(bool bCol) {
 	bCollided = bCol;
 }
 
+bool PacMan::getCollided() {
+	return bCollided;
+}
+
 void PacMan::draw() const {
 	if (bCollided) {
 		glPushMatrix();

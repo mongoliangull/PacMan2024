@@ -16,10 +16,19 @@ const int FPS = 60;
 int sTime = 0;
 int eTime = 0;
 
+enum GameState {
+    MENU,
+    PLAYING1,
+    PLAYING2
+};
+
+GameState currentState = MENU; // init
+
 Light light(BOUNDARY_X, BOUNDARY_Y, BOUNDARY_X / 2, GL_LIGHT0);
 
-Map map1;
 Map map;
+Map map1;
+Map map2;
 
 PacMan pacman(BLOCK_SIZE / 2.0f, 20, 20, false);
 Ghost blinky(BLOCK_SIZE / 2.0f, 20, 20, -250, 280, Ghost::STATE::CHASE, Ghost::STATE::SCATTER);
@@ -31,7 +40,7 @@ std::vector<Ghost*> Ghosts;
 
 CollisionHandler colhandler;
 
-int lives = 3;
+int Life = 2;
 
 int numSmallCoins = 0;
 int numBigCoins = 0;
@@ -40,112 +49,197 @@ int score = 0;
 using namespace std;
 
 void initialize() {
-    // Light
-    light.setAmbient(0.5f, 0.5f, 0.5f, 1.0f);
-    light.setDiffuse(0.7f, 0.7f, 0.7f, 1.0f);
-    light.setSpecular(1.0f, 1.0f, 1.0f, 1.0f);
+    if (currentState != MENU) {
+        // Light
+        light.setAmbient(0.5f, 0.5f, 0.5f, 1.0f);
+        light.setDiffuse(0.7f, 0.7f, 0.7f, 1.0f);
+        light.setSpecular(1.0f, 1.0f, 1.0f, 1.0f);
 
-    // PacMan
-    Material mtl;	// basic material
-    mtl.setEmission(0.2f, 0.2f, 0.2f, 1.0f);
-    mtl.setAmbient(0.6f, 0.6f, 0.0f, 1.0f);
-    mtl.setDiffuse(0.8f, 0.8f, 0.0f, 1.0f);
-    mtl.setSpecular(1.0f, 1.0f, 1.0f, 1.0f);
-    mtl.setShininess(30.0f);
+        // PacMan
+        Material mtl;	// basic material
+        mtl.setEmission(0.2f, 0.2f, 0.2f, 1.0f);
+        mtl.setAmbient(0.6f, 0.6f, 0.0f, 1.0f);
+        mtl.setDiffuse(0.8f, 0.8f, 0.0f, 1.0f);
+        mtl.setSpecular(1.0f, 1.0f, 1.0f, 1.0f);
+        mtl.setShininess(30.0f);
 
+        pacman.setIndexPosition(14, 23);
+        pacman.setVelocity(Vector3f(0.0f, 0.0f, 0.0f));
+        pacman.setMTL(mtl);
+
+        // Ghost: blinky
+        mtl.setEmission(0.2f, 0.2f, 0.2f, 1.0f);
+        mtl.setAmbient(0.6f, 0.0f, 0.0f, 1.0f);
+        mtl.setDiffuse(0.8f, 0.0f, 0.0f, 1.0f);
+        mtl.setSpecular(1.0f, 1.0f, 1.0f, 1.0f);
+        mtl.setShininess(30.0f);
+
+        blinky.setIndexPosition(1, 1);
+        blinky.setVelocity(Vector3f(0.0f, 0.0f, 0.0f));
+        blinky.setMTL(mtl);
+
+        // Ghost: pinky
+        mtl.setEmission(1.0f, 0.2f, 0.8f, 1.0f);
+        mtl.setAmbient(0.5f, 0.1f, 0.4f, 1.0f);
+        mtl.setDiffuse(1.0f, 0.2f, 0.8f, 1.0f);
+        mtl.setSpecular(1.0f, 0.6f, 0.9f, 1.0f);
+        mtl.setShininess(30.0f);
+
+        pinky.setIndexPosition(1, NUM_COL - 2); // NUM_ROW - 2 ,1
+        pinky.setVelocity(Vector3f(0.0f, 0.0f, 0.0f));
+        pinky.setMTL(mtl);
+
+        // Ghost: inky
+        mtl.setEmission(0.0f, 0.2f, 0.2f, 1.0f);
+        mtl.setAmbient(0.0f, 0.3f, 0.3f, 1.0f);
+        mtl.setDiffuse(0.0f, 0.8f, 0.8f, 1.0f);
+        mtl.setSpecular(0.0f, 0.8f, 0.8f, 1.0f);
+        mtl.setShininess(90.0f);
+
+        inky.setIndexPosition(NUM_ROW - 2, 1);
+        inky.setVelocity(Vector3f(0.0f, 0.0f, 0.0f));
+        inky.setMTL(mtl);
+
+        // Ghost: clyde
+        mtl.setEmission(0.0f, 0.1f, 0.0f, 1.0f);
+        mtl.setAmbient(0.0f, 0.2f, 0.0f, 1.0f);
+        mtl.setDiffuse(0.0f, 0.8f, 0.0f, 1.0f);
+        mtl.setSpecular(0.5f, 1.0f, 0.5f, 1.0f);
+        mtl.setShininess(80.0f);
+
+        clyde.setIndexPosition(NUM_ROW - 2, NUM_COL - 2);
+        clyde.setVelocity(Vector3f(0.0f, 0.0f, 0.0f));
+        clyde.setMTL(mtl);
+
+        //put ghosts in the ghosts vector
+        Ghosts.push_back(&blinky);
+        Ghosts.push_back(&pinky);
+        Ghosts.push_back(&inky);
+        Ghosts.push_back(&clyde);
+    }
+    if (currentState == PLAYING1) {
+        std::array<std::array<tileType, MAP_WIDTH>, MAP_HEIGHT> idxMap1 = { {
+            {w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w},
+            {w, o, o, o, o, o, o, o, o, o, o, o, o, w, w, o, o, o, o, o, o, o, o, o, o, o, o, w},
+            {w, o, w, w, w, w, o, w, w, w, w, w, o, w, w, o, w, w, w, w, w, o, w, w, w, w, o, w},
+            {w, O, w, w, w, w, o, w, w, w, w, w, o, w, w, o, w, w, w, w, w, o, w, w, w, w, O, w},
+            {w, o, w, w, w, w, o, w, w, w, w, w, o, w, w, o, w, w, w, w, w, o, w, w, w, w, o, w},
+            {w, o, o, o, o, o, o, o, o, o, o, o, o, o, o, o, o, o, o, o, o, o, o, o, o, o, o, w},
+            {w, o, w, w, w, w, o, w, w, o, w, w, w, w, w, w, w, w, o, w, w, o, w, w, w, w, o, w},
+            {w, o, w, w, w, w, o, w, w, o, w, w, w, w, w, w, w, w, o, w, w, o, w, w, w, w, o, w},
+            {w, o, o, o, o, o, o, w, w, o, o, o, o, w, w, o, o, o, o, w, w, o, o, o, o, o, o, w},
+            {w, w, w, w, w, w, o, w, w, w, w, w, p, w, w, p, w, w, w, w, w, o, w, w, w, w, w, w},
+            {w, w, w, w, w, w, o, w, w, w, w, w, p, w, w, p, w, w, w, w, w, o, w, w, w, w, w, w},
+            {w, w, w, w, w, w, o, w, w, p, p, p, p, p, p, p, p, p, p, w, w, o, w, w, w, w, w, w},
+            {w, w, w, w, w, w, o, w, w, p, w, w, w, h, h, w, w, w, p, w, w, o, w, w, w, w, w, w},
+            {w, w, w, w, w, w, o, w, w, p, w, p, p, p, p, p, p, w, p, w, w, o, w, w, w, w, w, w},
+            {p, p, p, p, p, p, o, p, p, p, w, p, p, p, p, p, p, w, p, p, p, o, p, p, p, p, p, p}, // center
+            {w, w, w, w, w, w, o, w, w, p, w, p, p, p, p, p, p, w, p, w, w, o, w, w, w, w, w, w},
+            {w, w, w, w, w, w, o, w, w, p, w, w, w, w, w, w, w, w, p, w, w, o, w, w, w, w, w, w},
+            {w, w, w, w, w, w, o, w, w, p, p, p, p, p, p, p, p, p, p, w, w, o, w, w, w, w, w, w},
+            {w, w, w, w, w, w, o, w, w, p, w, w, w, w, w, w, w, w, p, w, w, o, w, w, w, w, w, w},
+            {w, w, w, w, w, w, o, w, w, p, w, w, w, w, w, w, w, w, p, w, w, o, w, w, w, w, w, w},
+            {w, o, o, o, o, o, o, o, o, o, o, o, o, w, w, o, o, o, o, o, o, o, o, o, o, o, o, w},
+            {w, o, w, w, w, w, o, w, w, w, w, w, o, w, w, o, w, w, w, w, w, o, w, w, w, w, o, w},
+            {w, o, w, w, w, w, o, w, w, w, w, w, o, w, w, o, w, w, w, w, w, o, w, w, w, w, o, w},
+            {w, O, o, o, w, w, o, o, o, o, o, o, o, p, p, o, o, o, o, o, o, o, w, w, o, o, O, w},
+            {w, w, w, o, w, w, o, w, w, o, w, w, w, w, w, w, w, w, o, w, w, o, w, w, o, w, w, w},
+            {w, w, w, o, w, w, o, w, w, o, w, w, w, w, w, w, w, w, o, w, w, o, w, w, o, w, w, w},
+            {w, o, o, o, o, o, o, w, w, o, o, o, o, w, w, o, o, o, o, w, w, o, o, o, o, o, o, w},
+            {w, o, w, w, w, w, w, w, w, w, w, w, o, w, w, o, w, w, w, w, w, w, w, w, w, w, o, w},
+            {w, o, w, w, w, w, w, w, w, w, w, w, o, w, w, o, w, w, w, w, w, w, w, w, w, w, o, w},
+            {w, o, o, o, o, o, o, o, o, o, o, o, o, o, o, o, o, o, o, o, o, o, o, o, o, o, o, w},
+            {w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w}
+        } };
+        map1.createMap(idxMap1);
+
+        numSmallCoins = map1.smallCoins.coins.size();
+        numBigCoins = map1.bigCoins.coins.size();
+
+        map = map1;
+    }
+    else if (currentState == PLAYING2) {
+        std::array<std::array<tileType, MAP_WIDTH>, MAP_HEIGHT> idxMap2 = { {
+            {w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w},
+            {w, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, w},
+            {w, p, w, w, w, w, p, w, w, w, w, w, p, w, w, p, w, w, w, w, w, p, w, w, w, w, p, w},
+            {w, p, w, w, w, w, p, w, w, w, w, w, p, w, w, p, w, w, w, w, w, p, w, w, w, w, p, w},
+            {w, p, w, w, w, w, p, w, w, w, w, w, p, w, w, p, w, w, w, w, w, p, w, w, w, w, p, w},
+            {w, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, w},
+            {w, p, w, w, w, w, p, w, w, p, w, w, w, w, w, w, w, w, p, w, w, p, w, w, w, w, p, w},
+            {w, p, w, w, w, w, p, w, w, p, w, w, w, w, w, w, w, w, p, w, w, p, w, w, w, w, p, w},
+            {w, p, p, p, p, p, p, w, w, p, p, p, p, w, w, p, p, p, p, w, w, p, p, p, p, p, p, w},
+            {w, p, w, w, w, w, p, w, w, w, w, w, p, w, w, p, w, w, w, w, w, p, w, w, w, w, p, w},
+            {w, p, w, w, w, w, p, w, w, w, w, w, p, w, w, p, w, w, w, w, w, p, w, w, w, w, p, w},
+            {w, p, w, w, w, w, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, w, w, w, w, p, w},
+            {w, p, w, w, w, w, p, w, w, p, w, w, w, h, h, w, w, w, p, w, w, p, w, w, w, w, p, w},
+            {w, p, w, w, w, w, p, w, w, p, w, p, p, p, p, p, p, w, p, w, w, p, w, w, w, w, p, w},
+            {w, p, p, p, p, p, p, p, p, p, w, p, p, p, p, p, p, w, p, p, p, p, p, p, p, p, p, w}, // center
+            {w, p, w, w, w, w, p, w, w, p, w, p, p, p, p, p, p, w, p, w, w, p, w, w, w, w, p, w},
+            {w, p, w, w, w, w, p, w, w, p, w, w, w, w, w, w, w, w, p, w, w, p, w, w, w, w, p, w},
+            {w, p, w, w, w, w, p, w, w, p, p, p, p, p, p, p, p, p, p, w, w, p, w, w, w, w, p, w},
+            {w, p, w, w, w, w, p, w, w, p, w, w, w, w, w, w, w, w, p, w, w, p, w, w, w, w, p, w},
+            {w, p, w, w, w, w, p, w, w, p, w, w, w, w, w, w, w, w, p, w, w, p, w, w, w, w, p, w},
+            {w, p, p, p, p, p, p, p, p, p, p, p, O, O, O, O, p, p, p, p, p, p, p, p, p, p, p, w},
+            {w, p, w, w, w, w, p, w, w, w, w, w, o, w, w, o, w, w, w, w, w, p, w, w, w, w, p, w},
+            {w, p, w, w, w, w, p, w, w, w, w, w, o, w, w, o, w, w, w, w, w, p, w, w, w, w, p, w},
+            {w, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, w},
+            {w, p, w, w, w, w, p, w, w, p, w, w, w, w, w, w, w, w, p, w, w, p, w, w, w, w, p, w},
+            {w, p, w, w, w, w, p, w, w, p, w, w, w, w, w, w, w, w, p, w, w, p, w, w, w, w, p, w},
+            {w, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, w},
+            {w, p, w, w, w, w, w, w, w, w, w, w, p, w, w, p, w, w, w, w, w, w, w, w, w, w, p, w},
+            {w, p, w, w, w, w, w, w, w, w, w, w, p, w, w, p, w, w, w, w, w, w, w, w, w, w, p, w},
+            {w, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, w},
+            {w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w}
+        } };
+        map2.createMap(idxMap2);
+
+        numSmallCoins = map2.smallCoins.coins.size();
+        numBigCoins = map2.bigCoins.coins.size();
+
+        map = map2;
+    }
+}
+
+void revival() {
+
+    sTime = eTime;
     pacman.setIndexPosition(14, 23);
     pacman.setVelocity(Vector3f(0.0f, 0.0f, 0.0f));
-    pacman.setMTL(mtl);
-
-    // Ghost: blinky
-    mtl.setEmission(0.2f, 0.2f, 0.2f, 1.0f);
-    mtl.setAmbient(0.6f, 0.0f, 0.0f, 1.0f);
-    mtl.setDiffuse(0.8f, 0.0f, 0.0f, 1.0f);
-    mtl.setSpecular(1.0f, 1.0f, 1.0f, 1.0f);
-    mtl.setShininess(30.0f);
+    pacman.setCurrentDirection(Sphere::DIRECTION::NONE);
+    pacman.setCenter(10.0f, -160.0f, 0.0f);
 
     blinky.setIndexPosition(1, 1);
     blinky.setVelocity(Vector3f(0.0f, 0.0f, 0.0f));
-    blinky.setMTL(mtl);
+    blinky.setCurrentDirection(Sphere::DIRECTION::NONE);
+    blinky.setCenter(-250.0f, 280.0f, 0.0f);
+    blinky.setState(Ghost::STATE::CHASE);
+    blinky.setpTime(0);
+    blinky.setdTime(eTime);
 
-    // Ghost: pinky
-    mtl.setEmission(1.0f, 0.2f, 0.8f, 1.0f);
-    mtl.setAmbient(0.5f, 0.1f, 0.4f, 1.0f);
-    mtl.setDiffuse(1.0f, 0.2f, 0.8f, 1.0f);
-    mtl.setSpecular(1.0f, 0.6f, 0.9f, 1.0f);
-    mtl.setShininess(30.0f);
-
-    pinky.setIndexPosition(1, NUM_COL - 2); // NUM_ROW - 2 ,1
+    pinky.setIndexPosition(1, NUM_COL - 2);
     pinky.setVelocity(Vector3f(0.0f, 0.0f, 0.0f));
-    pinky.setMTL(mtl);
-
-    // Ghost: inky
-    mtl.setEmission(0.0f, 0.2f, 0.2f, 1.0f);
-    mtl.setAmbient(0.0f, 0.3f, 0.3f, 1.0f);
-    mtl.setDiffuse(0.0f, 0.8f, 0.8f, 1.0f);
-    mtl.setSpecular(0.0f, 0.8f, 0.8f, 1.0f);
-    mtl.setShininess(90.0f);
+    pinky.setCurrentDirection(Sphere::DIRECTION::NONE);
+    pinky.setCenter(-250.0f, -280.0f, 0.0f);
+    blinky.setState(Ghost::STATE::CHASE);
+    pinky.setpTime(0);
+    pinky.setdTime(eTime);
 
     inky.setIndexPosition(NUM_ROW - 2, 1);
     inky.setVelocity(Vector3f(0.0f, 0.0f, 0.0f));
-    inky.setMTL(mtl);
-
-    // Ghost: clyde
-    mtl.setEmission(0.0f, 0.1f, 0.0f, 1.0f);
-    mtl.setAmbient(0.0f, 0.2f, 0.0f, 1.0f);
-    mtl.setDiffuse(0.0f, 0.8f, 0.0f, 1.0f);
-    mtl.setSpecular(0.5f, 1.0f, 0.5f, 1.0f);
-    mtl.setShininess(80.0f);
+    inky.setCurrentDirection(Sphere::DIRECTION::NONE);
+    inky.setCenter(250.0f, 280.0f, 0.0f);
+    inky.setState(Ghost::STATE::CHASE);
+    inky.setpTime(0);
+    inky.setdTime(eTime);
 
     clyde.setIndexPosition(NUM_ROW - 2, NUM_COL - 2);
     clyde.setVelocity(Vector3f(0.0f, 0.0f, 0.0f));
-    clyde.setMTL(mtl);
-
-    //put ghosts in the ghosts vector
-    Ghosts.push_back(&blinky);
-    Ghosts.push_back(&pinky);
-    Ghosts.push_back(&inky);
-    Ghosts.push_back(&clyde);
-
-    std::array<std::array<tileType, MAP_WIDTH>, MAP_HEIGHT> idxMap1 = { {
-        {w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w},
-        {w, o, o, o, o, o, o, o, o, o, o, o, o, w, w, o, o, o, o, o, o, o, o, o, o, o, o, w},
-        {w, o, w, w, w, w, o, w, w, w, w, w, o, w, w, o, w, w, w, w, w, o, w, w, w, w, o, w},
-        {w, O, w, w, w, w, o, w, w, w, w, w, o, w, w, o, w, w, w, w, w, o, w, w, w, w, O, w},
-        {w, o, w, w, w, w, o, w, w, w, w, w, o, w, w, o, w, w, w, w, w, o, w, w, w, w, o, w},
-        {w, o, o, o, o, o, o, o, o, o, o, o, o, o, o, o, o, o, o, o, o, o, o, o, o, o, o, w},
-        {w, o, w, w, w, w, o, w, w, o, w, w, w, w, w, w, w, w, o, w, w, o, w, w, w, w, o, w},
-        {w, o, w, w, w, w, o, w, w, o, w, w, w, w, w, w, w, w, o, w, w, o, w, w, w, w, o, w},
-        {w, o, o, o, o, o, o, w, w, o, o, o, o, w, w, o, o, o, o, w, w, o, o, o, o, o, o, w},
-        {w, w, w, w, w, w, o, w, w, w, w, w, p, w, w, p, w, w, w, w, w, o, w, w, w, w, w, w},
-        {w, w, w, w, w, w, o, w, w, w, w, w, p, w, w, p, w, w, w, w, w, o, w, w, w, w, w, w},
-        {w, w, w, w, w, w, o, w, w, p, p, p, p, p, p, p, p, p, p, w, w, o, w, w, w, w, w, w},
-        {w, w, w, w, w, w, o, w, w, p, w, w, w, h, h, w, w, w, p, w, w, o, w, w, w, w, w, w}, 
-        {w, w, w, w, w, w, o, w, w, p, w, p, p, p, p, p, p, w, p, w, w, o, w, w, w, w, w, w},
-        {p, p, p, p, p, w, o, p, p, p, w, p, p, p, p, p, p, w, p, p, p, o, w, p, p, p, p, p}, // center
-        {w, w, w, w, w, w, o, w, w, p, w, p, p, p, p, p, p, w, p, w, w, o, w, w, w, w, w, w},
-        {w, w, w, w, w, w, o, w, w, p, w, w, w, w, w, w, w, w, p, w, w, o, w, w, w, w, w, w},
-        {w, w, w, w, w, w, o, w, w, p, p, p, p, p, p, p, p, p, p, w, w, o, w, w, w, w, w, w},
-        {w, w, w, w, w, w, o, w, w, p, w, w, w, w, w, w, w, w, p, w, w, o, w, w, w, w, w, w},
-        {w, w, w, w, w, w, o, w, w, p, w, w, w, w, w, w, w, w, p, w, w, o, w, w, w, w, w, w},
-        {w, o, o, o, o, o, o, o, o, o, o, o, o, w, w, o, o, o, o, o, o, o, o, o, o, o, o, w},
-        {w, o, w, w, w, w, o, w, w, w, w, w, o, w, w, o, w, w, w, w, w, o, w, w, w, w, o, w},
-        {w, o, w, w, w, w, o, w, w, w, w, w, o, w, w, o, w, w, w, w, w, o, w, w, w, w, o, w},
-        {w, O, o, o, w, w, o, o, o, o, o, o, o, p, p, o, o, o, o, o, o, o, w, w, o, o, O, w},
-        {w, w, w, o, w, w, o, w, w, o, w, w, w, w, w, w, w, w, o, w, w, o, w, w, o, w, w, w},
-        {w, w, w, o, w, w, o, w, w, o, w, w, w, w, w, w, w, w, o, w, w, o, w, w, o, w, w, w},
-        {w, o, o, o, o, o, o, w, w, o, o, o, o, w, w, o, o, o, o, w, w, o, o, o, o, o, o, w},
-        {w, o, w, w, w, w, w, w, w, w, w, w, o, w, w, o, w, w, w, w, w, w, w, w, w, w, o, w},
-        {w, o, w, w, w, w, w, w, w, w, w, w, o, w, w, o, w, w, w, w, w, w, w, w, w, w, o, w},
-        {w, o, o, o, o, o, o, o, o, o, o, o, o, o, o, o, o, o, o, o, o, o, o, o, o, o, o, w},
-        {w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w}
-    } };
-    map1.createMap(idxMap1);
-
-    numSmallCoins = map1.smallCoins.coins.size();
-    numBigCoins = map1.bigCoins.coins.size();
-
-    map = map1;
+    clyde.setCurrentDirection(Sphere::DIRECTION::NONE);
+    clyde.setCenter(250.0f, -280.0f, 0.0f);
+    clyde.setState(Ghost::STATE::CHASE);
+    clyde.setpTime(0);
+    clyde.setdTime(eTime);
 }
 
 void updateDirectionOfPacMan() {
@@ -155,7 +249,7 @@ void updateDirectionOfPacMan() {
     case Sphere::DIRECTION::NONE:
         break;
     case Sphere::DIRECTION::LEFT:
-        if (map.getBlock(pacman.getYIndex() % NUM_COL, (pacman.getXIndex() - 1) % NUM_ROW).isPassable())
+        if (map.getBlock(pacman.getYIndex() % NUM_COL, (pacman.getXIndex() - 1 + NUM_ROW) % NUM_ROW).isPassable())
             pacman.updateDirection();
         break;
     case Sphere::DIRECTION::RIGHT:
@@ -163,7 +257,7 @@ void updateDirectionOfPacMan() {
             pacman.updateDirection();
         break;
     case Sphere::DIRECTION::UP:
-        if (map.getBlock((pacman.getYIndex() - 1) % NUM_COL, pacman.getXIndex()% NUM_ROW).isPassable())
+        if (map.getBlock((pacman.getYIndex() - 1 + NUM_COL) % NUM_COL, pacman.getXIndex()% NUM_ROW).isPassable())
             pacman.updateDirection();
         break;
     case Sphere::DIRECTION::DOWN:
@@ -179,10 +273,10 @@ void updateDirectionOfGhost(Ghost& ghost, int targetX, int targetY) {
     /*std::cout << "curridxX: " << ghost.getXIndex() << "curridxY: " << ghost.getYIndex() << std::endl;*/
     int idx[2] = { ghost.getXIndex(), ghost.getYIndex() };
 
-    int lIdx[2] = { (idx[0] - 1), idx[1] };
-    int tIdx[2] = { idx[0] , (idx[1] - 1) };
-    int rIdx[2] = { (idx[0] + 1) , idx[1] };
-    int bIdx[2] = { idx[0] , (idx[1] + 1) };
+    int lIdx[2] = { (idx[0] - 1 + NUM_ROW) % NUM_ROW, idx[1] % NUM_COL };
+    int tIdx[2] = { idx[0] % NUM_ROW , (idx[1] - 1 + NUM_COL) % NUM_COL };
+    int rIdx[2] = { (idx[0] + 1) % NUM_ROW , idx[1] % NUM_COL};
+    int bIdx[2] = { idx[0] % NUM_ROW , (idx[1] + 1) % NUM_COL};
     /*std::cout << "ltrb" << std::endl;*/
     const Block& lBlock = map.getBlock(lIdx[1], lIdx[0]);
     const Block& tBlock = map.getBlock(tIdx[1], tIdx[0]);
@@ -400,21 +494,35 @@ void updateState() {
 }
 
 void idle() {
-    float spf = 1000.0f / FPS;
-    eTime = glutGet(GLUT_ELAPSED_TIME);
+    if (currentState != MENU) {
+        float spf = 1000.0f / FPS;
+        eTime = glutGet(GLUT_ELAPSED_TIME);
 
-    if (eTime - sTime > spf) {
-        /* Implement: update direction and move Pac-Man */
-        updatePacMan();
-        updateGhost();
-        for (auto ghost : Ghosts) {
-            if (ghost->getState() != Ghost::STATE::EATEN)
-                colhandler(pacman, *ghost);
+        if (eTime - sTime > spf) {
+            /* Implement: update direction and move Pac-Man */
+            updatePacMan();
+            updateGhost();
+            for (auto ghost : Ghosts) {
+                if (ghost->getState() != Ghost::STATE::EATEN)
+                    colhandler(pacman, *ghost);
+            }
+
+            if (pacman.getCollided()) {
+                if (Life) {
+                    revival();
+                    Life--;
+                    pacman.setCollided(false);
+                }
+                else {
+                    exit(0);
+                }
+            }
+
+            updateState();
+
+            sTime = eTime;
+            glutPostRedisplay();
         }
-        updateState();
-
-        sTime = eTime;
-        glutPostRedisplay();
     }
 }
 
@@ -425,9 +533,27 @@ void displayCharacters(void* font, string str, float x, float y) {
         glutBitmapCharacter(font, str[i]);
 }
 
+void displayMenu() {
+    glColor3f(1.0f, 1.0f, 1.0f); // Set color to white
+    glRasterPos2f(-50, 0); // Position for the text
+    std::string title = "PAC-MAN";
+    for (char c : title) {
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, c);
+    }
+
+    glRasterPos2f(-85, -50);
+    std::string startPrompt = "Press ENTER to Start";
+    for (char c : startPrompt) {
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, c);
+    }
+
+    glutSwapBuffers();
+}
+
 void display() {
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -437,70 +563,98 @@ void display() {
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-	// 2D draw
-    map1.draw();
-
-    colhandler(pacman, map1.smallCoins);
-    if (numSmallCoins > map1.smallCoins.coins.size()) {
-        numSmallCoins--;
-        score += 10;
+    if (currentState == MENU) {
+        displayMenu();
     }
-    colhandler(pacman, map1.bigCoins);
-    if (numBigCoins > map1.bigCoins.coins.size()) {
-        numBigCoins--;
-        score += 50;
+    else {
+        // 2D draw
+        map.draw();
 
-        for (auto ghost : Ghosts) {
-            if ((ghost->getState() == Ghost::STATE::CHASE) || (ghost->getState() == Ghost::STATE::SCATTER)) {
-                ghost->saveState();
-                ghost->setState(Ghost::STATE::FRIGHTENED); //Frightened로 바뀔 때, 이전 상태를 저장, state 전환, 흘러간 시간을 pTime에 저장, dTime 초기화
-                ghost->setpTime(eTime - ghost->getdTime());
-                ghost->setdTime(eTime);
+        colhandler(pacman, map.smallCoins);
+        if (numSmallCoins > map.smallCoins.coins.size()) {
+            numSmallCoins--;
+            score += 10;
+        }
+        colhandler(pacman, map.bigCoins);
+        if (numBigCoins > map.bigCoins.coins.size()) {
+            numBigCoins--;
+            score += 50;
+
+            for (auto ghost : Ghosts) {
+                if ((ghost->getState() == Ghost::STATE::CHASE) || (ghost->getState() == Ghost::STATE::SCATTER)) {
+                    ghost->saveState();
+                    ghost->setState(Ghost::STATE::FRIGHTENED); //Frightened로 바뀔 때, 이전 상태를 저장, state 전환, 흘러간 시간을 pTime에 저장, dTime 초기화
+                    ghost->setpTime(eTime - ghost->getdTime());
+                    ghost->setdTime(eTime);
+                }
             }
         }
+
+        if (numSmallCoins == 0 && numBigCoins == 0) {
+            currentState = static_cast<GameState>(static_cast<int>(currentState) + 1);
+            initialize();
+        }
+
+        if (blinky.getState() == Ghost::STATE::CHASE)
+            displayCharacters(GLUT_BITMAP_HELVETICA_18, "key 1: change ghost's state (Chase)", -270, -340);
+        else if (blinky.getState() == Ghost::STATE::SCATTER)
+            displayCharacters(GLUT_BITMAP_HELVETICA_18, "key 1: change ghost's state (Scatter)", -270, -340);
+        else if (blinky.getState() == Ghost::STATE::FRIGHTENED)
+            displayCharacters(GLUT_BITMAP_HELVETICA_18, "key 2: change ghost's state (Frightened)", -270, -340);
+        else if (blinky.getState() == Ghost::STATE::EATEN)
+            displayCharacters(GLUT_BITMAP_HELVETICA_18, "key 2: change ghost's state (Eaten)", -270, -340);
+
+        // 3D draw
+        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_LIGHTING);
+        glEnable(light.getID());
+
+        light.draw();
+
+        map.drawCoins();
+        pacman.draw();
+        for (auto ghost : Ghosts) {
+            ghost->draw();
+        }
+
+        for (int i = 0; i <= Life; i++) {
+            GLfloat ambient[4]{ 0.6f, 0.6f, 0.0f, 1.0f };
+            GLfloat emission[4]{ 0.2f, 0.2f, 0.2f, 1.0f };
+            GLfloat diffuse[4]{ 0.8f, 0.8f, 0.0f, 1.0f };
+            GLfloat specular[4]{ 1.0f, 1.0f, 1.0f, 1.0f };
+            GLfloat shininess[1]{ 30.0f };
+            glPushMatrix();
+            glTranslatef(270 - i * 22, -340, 0);
+            glShadeModel(GL_SMOOTH);
+            glMaterialfv(GL_FRONT, GL_EMISSION, emission);
+            glMaterialfv(GL_FRONT, GL_AMBIENT, ambient);
+            glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse);
+            glMaterialfv(GL_FRONT, GL_SPECULAR, specular);
+            glMaterialfv(GL_FRONT, GL_SHININESS, shininess);
+            glutSolidSphere(10, 20, 20);
+            glPopMatrix();
+        }
+
+        glDisable(GL_DEPTH_TEST);
+        glDisable(GL_LIGHTING);
+        glDisable(light.getID());
+
+        // draw text
+        glColor3f(1.0f, 1.0f, 1.0f);
+        std::string name = "HIGH SCORE";                            // High score print
+        glRasterPos2f(-40, 350);
+        for (int i = 0; i < name.size(); i++)
+            glutBitmapCharacter(GLUT_BITMAP_9_BY_15, name[i]);
+
+        std::ostringstream oss;
+        oss << std::setw(6) << std::setfill('0') << score;
+        std::string scoreString = oss.str();                        // High score print
+        glRasterPos2f(-270, 320);
+        for (int i = 0; i < scoreString.size(); i++)
+            glutBitmapCharacter(GLUT_BITMAP_9_BY_15, scoreString[i]);
+
+        glutSwapBuffers();
     }
-
-    if (blinky.getState() == Ghost::STATE::CHASE)
-        displayCharacters(GLUT_BITMAP_HELVETICA_18, "key 1: change ghost's state (Chase)", -270, -340);
-    else if (blinky.getState() == Ghost::STATE::SCATTER)
-        displayCharacters(GLUT_BITMAP_HELVETICA_18, "key 1: change ghost's state (Scatter)", -270, -340);
-    else if (blinky.getState() == Ghost::STATE::FRIGHTENED)
-        displayCharacters(GLUT_BITMAP_HELVETICA_18, "key 2: change ghost's state (Frightened)", -270, -340);
-    else if (blinky.getState() == Ghost::STATE::EATEN)
-        displayCharacters(GLUT_BITMAP_HELVETICA_18, "key 2: change ghost's state (Eaten)", -270, -340);
-
-    // 3D draw
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_LIGHTING);
-    glEnable(light.getID());
-
-    light.draw();
-
-    map1.drawCoins();
-    pacman.draw();
-    for (auto ghost : Ghosts) {
-        ghost->draw();
-    }
-
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_LIGHTING);
-    glDisable(light.getID());
-
-    // draw text
-    glColor3f(1.0f, 1.0f, 1.0f);
-    std::string name = "HIGH SCORE";                            // High score print
-    glRasterPos2f(-40, 350);
-    for (int i = 0; i < name.size(); i++)
-        glutBitmapCharacter(GLUT_BITMAP_9_BY_15, name[i]);
-
-    std::ostringstream oss;
-    oss << std::setw(6) << std::setfill('0') << score;
-    std::string scoreString = oss.str();                        // High score print
-    glRasterPos2f(-270, 320);
-    for (int i = 0; i < scoreString.size(); i++)
-        glutBitmapCharacter(GLUT_BITMAP_9_BY_15, scoreString[i]);
-
-	glutSwapBuffers();
 }
 
 void keyboardDown(unsigned char key, int x, int y) {
@@ -516,6 +670,11 @@ void keyboardDown(unsigned char key, int x, int y) {
                 ghost->setpTime(eTime - ghost->getdTime());
                 ghost->setdTime(eTime);
             }
+        }
+    case 13: // ENTER
+        if (currentState == MENU) {
+            currentState = PLAYING1;
+            initialize();
         }
     default:
         break;
