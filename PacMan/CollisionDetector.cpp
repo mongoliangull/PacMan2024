@@ -25,7 +25,9 @@ bool CollisionDetector::operator()(const PacMan& pacman, const Map& map) {
 			return false;
 		break;
 	case Sphere::DIRECTION::DOWN:
-		if (map.getBlock((pacman.getYIndex() + 1) % NUM_COL, pacman.getXIndex() % NUM_ROW).isPassable())
+		if (map.getBlock((pacman.getYIndex() + 1) % NUM_COL, pacman.getXIndex() % NUM_ROW).isHalfWall())
+			return false;
+		else if (map.getBlock((pacman.getYIndex() + 1) % NUM_COL, pacman.getXIndex() % NUM_ROW).isPassable())
 			return true;
 		else
 			return false;

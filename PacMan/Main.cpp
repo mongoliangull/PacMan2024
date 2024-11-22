@@ -31,6 +31,8 @@ std::vector<Ghost*> Ghosts;
 
 CollisionHandler colhandler;
 
+int lives = 3;
+
 int numSmallCoins = 0;
 int numBigCoins = 0;
 int score = 0;
@@ -120,7 +122,7 @@ void initialize() {
         {w, w, w, w, w, w, o, w, w, p, p, p, p, p, p, p, p, p, p, w, w, o, w, w, w, w, w, w},
         {w, w, w, w, w, w, o, w, w, p, w, w, w, h, h, w, w, w, p, w, w, o, w, w, w, w, w, w}, 
         {w, w, w, w, w, w, o, w, w, p, w, p, p, p, p, p, p, w, p, w, w, o, w, w, w, w, w, w},
-        {p, p, p, p, p, p, o, p, p, p, w, p, p, p, p, p, p, w, p, p, p, o, p, p, p, p, p, p}, // center
+        {p, p, p, p, p, w, o, p, p, p, w, p, p, p, p, p, p, w, p, p, p, o, w, p, p, p, p, p}, // center
         {w, w, w, w, w, w, o, w, w, p, w, p, p, p, p, p, p, w, p, w, w, o, w, w, w, w, w, w},
         {w, w, w, w, w, w, o, w, w, p, w, w, w, w, w, w, w, w, p, w, w, o, w, w, w, w, w, w},
         {w, w, w, w, w, w, o, w, w, p, p, p, p, p, p, p, p, p, p, w, w, o, w, w, w, w, w, w},
@@ -165,7 +167,7 @@ void updateDirectionOfPacMan() {
             pacman.updateDirection();
         break;
     case Sphere::DIRECTION::DOWN:
-        if (map.getBlock((pacman.getYIndex() + 1) % NUM_COL, pacman.getXIndex() % NUM_ROW).isPassable())
+        if (!map.getBlock((pacman.getYIndex() + 1) % NUM_COL, pacman.getXIndex() % NUM_ROW).isHalfWall() && map.getBlock((pacman.getYIndex() + 1) % NUM_COL, pacman.getXIndex() % NUM_ROW).isPassable())
             pacman.updateDirection();
         break;
     }
@@ -290,7 +292,15 @@ void updateGhost() {
             int targetX = 0;
             int targetY = 0;
             // set target
-            if (Ghosts[i]->getState() == Ghost::STATE::CHASE) {
+            if (Ghosts[i]->getState() == Ghost::STATE::EATEN) { //이거도 전부 동일
+                targetX = 0;
+                targetY = 0;
+            }
+            else if (Ghosts[i]->getCenter()[0] >= -60.0f && Ghosts[i]->getCenter()[0] <= 60.0f && Ghosts[i]->getCenter()[1] >= -10.0f && Ghosts[i]->getCenter()[1] <= 70.0f) { // If ghost is in Ghost room
+                targetX = 0;
+                targetY = 80;
+            }
+            else if (Ghosts[i]->getState() == Ghost::STATE::CHASE) {
                 if (i == 0) {
                     targetX = pacman.getCenter()[0];
                     targetY = pacman.getCenter()[1];
@@ -358,10 +368,6 @@ void updateGhost() {
             else if (Ghosts[i]->getState() == Ghost::STATE::FRIGHTENED) { // Frightened 일때는 모두 동일하게 팩맨 위치로 설정해서 팩맨에서 멀어지도록
                 targetX = pacman.getCenter()[0];
                 targetY = pacman.getCenter()[1];
-            }
-            else if (Ghosts[i]->getState() == Ghost::STATE::EATEN) { //이거도 전부 동일
-                targetX = 0;
-                targetY = 0;
             }
             updateDirectionOfGhost(*Ghosts[i], targetX, targetY);
         }
@@ -443,6 +449,15 @@ void display() {
     if (numBigCoins > map1.bigCoins.coins.size()) {
         numBigCoins--;
         score += 50;
+
+        for (auto ghost : Ghosts) {
+            if ((ghost->getState() == Ghost::STATE::CHASE) || (ghost->getState() == Ghost::STATE::SCATTER)) {
+                ghost->saveState();
+                ghost->setState(Ghost::STATE::FRIGHTENED); //Frightened로 바뀔 때, 이전 상태를 저장, state 전환, 흘러간 시간을 pTime에 저장, dTime 초기화
+                ghost->setpTime(eTime - ghost->getdTime());
+                ghost->setdTime(eTime);
+            }
+        }
     }
 
     if (blinky.getState() == Ghost::STATE::CHASE)
