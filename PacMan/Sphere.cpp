@@ -224,12 +224,12 @@ void PacMan::draw() const {
 	}
 }
 
-Ghost::Ghost(float r, int sl, int st, STATE s, STATE ps) {
+Ghost::Ghost(float r, int sl, int st, int ctX, int ctY, STATE s, STATE ps) {
 	radius = r;
 	slice = sl;
 	stack = st;
-	center[0] = -250;
-	center[1] = 280;
+	center[0] = ctX;
+	center[1] = ctY;
 	center[2] = 0;
 	velocity[0] = 0;
 	velocity[1] = 0;
@@ -237,11 +237,16 @@ Ghost::Ghost(float r, int sl, int st, STATE s, STATE ps) {
 	idxPos[0] = 1;
 	idxPos[1] = 1;
 	bInxPosUpdated = 0;
+	origin[0] = ctX;
+	origin[1] = ctY;
 
 	currDirection = Sphere::DIRECTION::NONE;
 	nextDirection = Sphere::DIRECTION::NONE;
 	state = s;
 	prevstate = ps;
+
+	dTime = 0;
+	pTime = 0;
 }
 
 void Ghost::setState(STATE s) {
@@ -258,6 +263,30 @@ Ghost::STATE Ghost::getState() const {
 
 Ghost::STATE Ghost::getprevState() const {
 	return prevstate;
+}
+
+void Ghost::setdTime(int time) {
+	dTime = time;
+}
+
+int Ghost::getdTime() {
+	return dTime;
+}
+
+void Ghost::setpTime(int time) {
+	pTime = time;
+}
+
+int Ghost::getpTime() {
+	return pTime;
+}
+
+int Ghost::getOriginX() {
+	return origin[0];
+}
+
+int Ghost::getOriginY() {
+	return origin[1];
 }
 
 void Ghost::updateVelocity() {

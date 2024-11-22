@@ -65,17 +65,26 @@ class Ghost : public Sphere
 public:
 	enum STATE { CHASE, SCATTER, FRIGHTENED, EATEN };
 
-	Ghost(float r, int sl, int st, STATE s, STATE ps);
+	Ghost(float r, int sl, int st, int ctX, int ctY, STATE s, STATE ps);
 
 	void setState(STATE s);
 	void saveState();
 	STATE getState() const;
 	void updateVelocity();
 	STATE getprevState() const;
+	void setdTime(int time);
+	int getdTime();
+	void setpTime(int time);
+	int getpTime();
+	int getOriginX();
+	int getOriginY();
 
 	virtual void draw() const;
 
 private:
+	int origin[2];
+	int dTime;
+	int pTime;
 	STATE state;
 	STATE prevstate;
 };
