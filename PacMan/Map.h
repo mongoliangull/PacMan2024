@@ -10,13 +10,18 @@ public:
 	Block();
 	Block(float x, float y, float z, float w, float h);
 
+	typedef enum {noCoin, sCoin, bCoin} typeCoin;
+
 	void setWidth(float w);
 	void setHeight(float h);
 	void setIsPassable(bool i);
+	void setIsCoin(typeCoin c);
+	
 
 	float getWidth() const;
 	float getHeight() const;
 	bool isPassable() const;
+	typeCoin isCoin() const;
 
 	void draw() const;
 
@@ -24,6 +29,7 @@ private:
 	float x, y, z;
 	float width, height;
 	bool bPassable;
+	typeCoin tCoin;
 };
 
 class Map {
@@ -38,8 +44,9 @@ public:
 
 	void drawCoins() const;
 
+	CoinCollection smallCoins;
+	CoinCollection bigCoins;
+
 private:
 	std::array<std::array<Block, MAP_WIDTH>, MAP_HEIGHT> tiles;
-	std::vector<Coin> smallCoins;
-	std::vector<Coin> bigCoins;
 };

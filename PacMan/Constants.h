@@ -22,7 +22,7 @@
 #define BLOCK_SIZE 20
 #define TILE_SIZE 20		// block size == tile size
 
-#define MOVE_SPEED 1
+#define MOVE_SPEED 10
 
 // Map boundary
 #define LEFT_BOUNDARY (-(NUM_ROW / 2) * BLOCK_SIZE)

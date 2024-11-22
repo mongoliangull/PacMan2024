@@ -1,5 +1,7 @@
 #include "CollisionHandler.h"
 
+#include <iostream>
+
 void CollisionHandler::operator()(PacMan& sphere, const Map& map) {
 	CollisionDetector coldector;
 	if (coldector(sphere, map)) {
@@ -33,5 +35,37 @@ void CollisionHandler::operator()(PacMan& pacman, Ghost& ghost) {
 	}
 	else {
 		pacman.setCollided(false);
+	}
+}
+
+void CollisionHandler::operator()(PacMan& pacman, CoinCollection& coins) {
+	CollisionDetector coldector;
+	int idxX = 0, idxY = 0;
+	switch (pacman.getCurrentDirection()) {
+	case Sphere::DIRECTION::LEFT:
+		idxX = -1;
+		idxY = 0;
+		break;
+	case Sphere::DIRECTION::RIGHT:
+		idxX = 1;
+		idxY = 0;
+		break;
+	case Sphere::DIRECTION::UP:
+		idxX = 0;
+		idxY = -1;
+		break;
+	case Sphere::DIRECTION::DOWN:
+		idxX = 0;
+		idxY = 1;
+		break;
+	}
+	idxX += pacman.getXIndex();
+	idxY += pacman.getYIndex();
+
+	idxX %= NUM_ROW;
+	idxY %= NUM_COL;
+
+	if (coldector(pacman, coins.findCoin(idxY, idxX))) {
+		coins.removeCoin(coins.findCoin(idxY, idxX));
 	}
 }

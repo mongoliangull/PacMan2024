@@ -55,12 +55,12 @@ void Sphere::updateCheck() {
 	/*cout << center[0] << " " << center[1] << endl;
 	cout << (idxPos[0] - 4) * 40 << " " << (idxPos[1] - 4) * 40 << endl;*/
 	if (velocity[0] > 0.0f) {
-		if (center[0] - radius >= (idxPos[0] + 1 - NUM_ROW / 2.0f) * BLOCK_SIZE) {
-			if (idxPos[0] < NUM_COL - 1)
+		if (center[0] - radius >= (idxPos[0] + 1) * BLOCK_SIZE + LEFT_BOUNDARY) { //idxPos[0] + 1 - NUM_ROW / 2.0f) * BLOCK_SIZE
+			if (idxPos[0] < NUM_ROW - 1)
 				setIndexPosition(idxPos[0] + 1, idxPos[1]);
 			else {
 				setIndexPosition(0, idxPos[1]);
-				center[0] = -BLOCK_SIZE*(NUM_COL/2);
+				center[0] = LEFT_BOUNDARY + BLOCK_SIZE / 2.0f;
 			}
 			bInxPosUpdated = true;
 		}
@@ -68,12 +68,12 @@ void Sphere::updateCheck() {
 			bInxPosUpdated = false;
 	}
 	else if (velocity[0] < 0.0f) {
-		if (center[0] + radius <= (idxPos[0] - NUM_ROW / 2.0f) * BLOCK_SIZE) {
+		if (center[0] + radius <= (idxPos[0]) * BLOCK_SIZE + LEFT_BOUNDARY) {
 			if (idxPos[0] > 0)
 				setIndexPosition(idxPos[0] - 1, idxPos[1]);
 			else {
-				setIndexPosition(NUM_COL - 1, idxPos[1]);
-				center[0] = BLOCK_SIZE * (NUM_COL / 2);
+				setIndexPosition(NUM_ROW - 1, idxPos[1]);
+				center[0] = BLOCK_SIZE * (NUM_ROW / 2.0f - 0.5f);
 			}
 			bInxPosUpdated = true;
 		}
@@ -81,12 +81,12 @@ void Sphere::updateCheck() {
 			bInxPosUpdated = false;
 	}
 	else if (velocity[1] > 0.0f) {
-		if (center[1] - radius >= (NUM_COL / 2.0f - idxPos[1]) * BLOCK_SIZE) {
+		if (center[1] - radius >= (- idxPos[1] * BLOCK_SIZE + TOP_BOUNDARY)) {
 			if (idxPos[1] > 0)
 				setIndexPosition(idxPos[0], idxPos[1] - 1);
 			else {
-				setIndexPosition(idxPos[0], NUM_ROW - 1);
-				center[1] = -BLOCK_SIZE * (NUM_COL / 2);
+				setIndexPosition(idxPos[0], NUM_COL - 1);
+				center[1] = -BLOCK_SIZE * (NUM_COL / 2.0f);
 			}
 			bInxPosUpdated = true;
 		}
@@ -94,12 +94,12 @@ void Sphere::updateCheck() {
 			bInxPosUpdated = false;
 	}
 	else if (velocity[1] < 0.0f) {
-		if (center[1] + radius <= (NUM_COL / 2.0f - idxPos[1] - 1) * BLOCK_SIZE) {
-			if (idxPos[1] < NUM_ROW - 1)
+		if (center[1] + radius <= (-idxPos[1] - 1) * BLOCK_SIZE + TOP_BOUNDARY) {
+			if (idxPos[1] < NUM_COL - 1)
 				setIndexPosition(idxPos[0], idxPos[1] + 1);
 			else {
 				setIndexPosition(idxPos[1], 0);
-				center[1] = +BLOCK_SIZE * (NUM_COL / 2);
+				center[1] = +BLOCK_SIZE * (NUM_COL / 2.0f);
 			}
 			bInxPosUpdated = true;
 		}
@@ -360,11 +360,14 @@ void Ghost::draw() const {
 	}
 }
 
-Coin::Coin(float r, int sl, int st, const Vector3f& pos) {
+Coin::Coin(float r, int sl, int st, const Vector3f& pos, int idxX, int idxY, bool big) {
 	radius = r;
 	slice = sl;
 	stack = st;
 	center = pos;
+	idxPos[0] = idxX;
+	idxPos[1] = idxY;
+	bBig = big;
 	mtl.setEmission(0.2f, 0.2f, 0.2f, 1.0f);
 	mtl.setAmbient(0.6f, 0.6f, 0.0f, 1.0f);
 	mtl.setDiffuse(0.8f, 0.8f, 0.0f, 1.0f);
@@ -391,4 +394,25 @@ void Coin::draw() const {
 	glMaterialfv(GL_FRONT, GL_SHININESS, shininess);
 	glutSolidSphere(radius, slice, stack);
 	glPopMatrix();
+}
+
+void Coin::setIsBig(bool big) {
+	bBig = big;
+}
+
+void Coin::setIdxPos(int x, int y) {
+	idxPos[0] = x;
+	idxPos[1] = y;
+}
+
+bool Coin::isBig() const {
+	return bBig;
+}
+
+int Coin::getIdxX() const {
+	return idxPos[0];
+}
+
+int Coin::getIdxY() const {
+	return idxPos[1];
 }
