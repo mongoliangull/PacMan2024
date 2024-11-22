@@ -7,12 +7,29 @@
       "RelativeMoniker": "D:0:0:{2CCC7864-05F1-4DE6-93EC-BF2E4354AC52}|PacMan\\PacMan.vcxproj|solutionrelative:PacMan\\Main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{2CCC7864-05F1-4DE6-93EC-BF2E4354AC52}|PacMan\\PacMan.vcxproj|C:\\Users\\yeongmok\\Desktop\\PacMan2024\\PacMan\\CollisionDetector.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{2CCC7864-05F1-4DE6-93EC-BF2E4354AC52}|PacMan\\PacMan.vcxproj|solutionrelative:PacMan\\CollisionDetector.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\yeongmok\\Documents\\\uCE74\uCE74\uC624\uD1A1 \uBC1B\uC740 \uD30C\uC77C\\Main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\yeongmok\\Documents\\\uCE74\uCE74\uC624\uD1A1 \uBC1B\uC740 \uD30C\uC77C\\Sphere.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2CCC7864-05F1-4DE6-93EC-BF2E4354AC52}|PacMan\\PacMan.vcxproj|C:\\Users\\yeongmok\\Desktop\\PacMan2024\\PacMan\\CollisionHandler.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{2CCC7864-05F1-4DE6-93EC-BF2E4354AC52}|PacMan\\PacMan.vcxproj|solutionrelative:PacMan\\CollisionHandler.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{2CCC7864-05F1-4DE6-93EC-BF2E4354AC52}|PacMan\\PacMan.vcxproj|C:\\Users\\yeongmok\\Desktop\\PacMan2024\\PacMan\\Sphere.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{2CCC7864-05F1-4DE6-93EC-BF2E4354AC52}|PacMan\\PacMan.vcxproj|solutionrelative:PacMan\\Sphere.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2CCC7864-05F1-4DE6-93EC-BF2E4354AC52}|PacMan\\PacMan.vcxproj|C:\\Users\\yeongmok\\Desktop\\PacMan2024\\PacMan\\Sphere.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{2CCC7864-05F1-4DE6-93EC-BF2E4354AC52}|PacMan\\PacMan.vcxproj|solutionrelative:PacMan\\Sphere.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2CCC7864-05F1-4DE6-93EC-BF2E4354AC52}|PacMan\\PacMan.vcxproj|C:\\Users\\yeongmok\\Desktop\\PacMan2024\\PacMan\\CollisionDetector.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{2CCC7864-05F1-4DE6-93EC-BF2E4354AC52}|PacMan\\PacMan.vcxproj|solutionrelative:PacMan\\CollisionDetector.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C49463D8-06DF-4A56-A9CE-2A67B6533110}|..\\..\\AppData\\Roaming\\Microsoft\\VisualStudio\\17.0_9bf11e60\\SingleFileISense\\_sfi_3aae11e8-bc7b-415a-bd83-9499e4bec39d_.vcxproj|C:\\USERS\\YEONGMOK\\DOCUMENTS\\\uCE74\uCE74\uC624\uD1A1 \uBC1B\uC740 \uD30C\uC77C\\SPHERE.H||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{2CCC7864-05F1-4DE6-93EC-BF2E4354AC52}|PacMan\\PacMan.vcxproj|C:\\Users\\yeongmok\\Desktop\\PacMan2024\\PacMan\\Map.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
@@ -34,24 +51,50 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 5,
+          "SelectedChildIndex": 8,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 3,
+              "Title": "CollisionHandler.cpp",
+              "DocumentMoniker": "C:\\Users\\yeongmok\\Desktop\\PacMan2024\\PacMan\\CollisionHandler.cpp",
+              "RelativeDocumentMoniker": "PacMan\\CollisionHandler.cpp",
+              "ToolTip": "C:\\Users\\yeongmok\\Desktop\\PacMan2024\\PacMan\\CollisionHandler.cpp",
+              "RelativeToolTip": "PacMan\\CollisionHandler.cpp",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABMAAAACAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2024-11-22T05:02:54.358Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "Sphere.h",
+              "DocumentMoniker": "C:\\Users\\yeongmok\\Desktop\\PacMan2024\\PacMan\\Sphere.h",
+              "RelativeDocumentMoniker": "PacMan\\Sphere.h",
+              "ToolTip": "C:\\Users\\yeongmok\\Desktop\\PacMan2024\\PacMan\\Sphere.h",
+              "RelativeToolTip": "PacMan\\Sphere.h",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAFYAAAALAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2024-11-22T04:59:47.301Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
               "Title": "CollisionDetector.cpp",
               "DocumentMoniker": "C:\\Users\\yeongmok\\Desktop\\PacMan2024\\PacMan\\CollisionDetector.cpp",
               "RelativeDocumentMoniker": "PacMan\\CollisionDetector.cpp",
               "ToolTip": "C:\\Users\\yeongmok\\Desktop\\PacMan2024\\PacMan\\CollisionDetector.cpp",
               "RelativeToolTip": "PacMan\\CollisionDetector.cpp",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAvAAAAAAAAAA==",
+              "ViewState": "AgIAABgAAAAAAAAAAAAAACMAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2024-11-22T04:29:04.733Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 10,
               "Title": "Constants.h",
               "DocumentMoniker": "C:\\Users\\yeongmok\\Desktop\\PacMan2024\\PacMan\\Constants.h",
               "RelativeDocumentMoniker": "PacMan\\Constants.h",
@@ -59,25 +102,24 @@
               "RelativeToolTip": "PacMan\\Constants.h",
               "ViewState": "AgIAAB4AAAAAAAAAAAAAACkAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2024-11-21T15:44:31.598Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-11-21T15:44:31.598Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 4,
               "Title": "Sphere.cpp",
               "DocumentMoniker": "C:\\Users\\yeongmok\\Desktop\\PacMan2024\\PacMan\\Sphere.cpp",
               "RelativeDocumentMoniker": "PacMan\\Sphere.cpp",
               "ToolTip": "C:\\Users\\yeongmok\\Desktop\\PacMan2024\\PacMan\\Sphere.cpp",
               "RelativeToolTip": "PacMan\\Sphere.cpp",
-              "ViewState": "AgIAADMAAAAAAAAAAAAAAD0AAAAjAAAAAAAAAA==",
+              "ViewState": "AgIAADEAAAAAAAAAAAAuwEgAAAAtAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2024-11-21T14:25:50.319Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 9,
               "Title": "Map.h",
               "DocumentMoniker": "C:\\Users\\yeongmok\\Desktop\\PacMan2024\\PacMan\\Map.h",
               "RelativeDocumentMoniker": "PacMan\\Map.h",
@@ -85,12 +127,11 @@
               "RelativeToolTip": "PacMan\\Map.h",
               "ViewState": "AgIAABsAAAAAAAAAAAAAACwAAAAYAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2024-11-22T01:30:33.3Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-11-22T01:30:33.3Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 8,
               "Title": "Map.cpp",
               "DocumentMoniker": "C:\\Users\\yeongmok\\Desktop\\PacMan2024\\PacMan\\Map.cpp",
               "RelativeDocumentMoniker": "PacMan\\Map.cpp",
@@ -98,8 +139,7 @@
               "RelativeToolTip": "PacMan\\Map.cpp",
               "ViewState": "AgIAAEMAAAAAAAAAAAAawEwAAAA0AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2024-11-21T15:13:09.676Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-11-21T15:13:09.676Z"
             },
             {
               "$type": "Document",
@@ -107,11 +147,71 @@
               "Title": "Main.cpp",
               "DocumentMoniker": "C:\\Users\\yeongmok\\Desktop\\PacMan2024\\PacMan\\Main.cpp",
               "RelativeDocumentMoniker": "PacMan\\Main.cpp",
-              "ToolTip": "C:\\Users\\yeongmok\\Desktop\\PacMan2024\\PacMan\\Main.cpp",
-              "RelativeToolTip": "PacMan\\Main.cpp",
-              "ViewState": "AgIAAEUAAAAAAAAAAAAAABgAAAAwAAAAAAAAAA==",
+              "ToolTip": "C:\\Users\\yeongmok\\Desktop\\PacMan2024\\PacMan\\Main.cpp*",
+              "RelativeToolTip": "PacMan\\Main.cpp*",
+              "ViewState": "AgIAAAUBAAAAAAAAAAAIwBgBAAAMAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2024-10-30T09:45:11.128Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "FloatingWindowState": {
+        "Id": "5b61c5d0-4473-46d7-9e2e-9a69795b6b8c",
+        "Display": 0,
+        "X": 347,
+        "Y": 183,
+        "Width": 1098,
+        "Height": 604,
+        "WindowState": 0
+      },
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Main.cpp",
+              "DocumentMoniker": "C:\\Users\\yeongmok\\Documents\\\uCE74\uCE74\uC624\uD1A1 \uBC1B\uC740 \uD30C\uC77C\\Main.cpp",
+              "RelativeDocumentMoniker": "..\\..\\Documents\\\uCE74\uCE74\uC624\uD1A1 \uBC1B\uC740 \uD30C\uC77C\\Main.cpp",
+              "ToolTip": "C:\\Users\\yeongmok\\Documents\\\uCE74\uCE74\uC624\uD1A1 \uBC1B\uC740 \uD30C\uC77C\\Main.cpp",
+              "RelativeToolTip": "..\\..\\Documents\\\uCE74\uCE74\uC624\uD1A1 \uBC1B\uC740 \uD30C\uC77C\\Main.cpp",
+              "ViewState": "AgIAAKgAAAAAAAAAAAAiwLAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2024-11-22T04:54:16.946Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "Sphere.h",
+              "DocumentMoniker": "C:\\Users\\yeongmok\\Documents\\\uCE74\uCE74\uC624\uD1A1 \uBC1B\uC740 \uD30C\uC77C\\Sphere.h",
+              "RelativeDocumentMoniker": "..\\..\\Documents\\\uCE74\uCE74\uC624\uD1A1 \uBC1B\uC740 \uD30C\uC77C\\Sphere.h",
+              "ToolTip": "C:\\Users\\yeongmok\\Documents\\\uCE74\uCE74\uC624\uD1A1 \uBC1B\uC740 \uD30C\uC77C\\Sphere.h",
+              "RelativeToolTip": "..\\..\\Documents\\\uCE74\uCE74\uC624\uD1A1 \uBC1B\uC740 \uD30C\uC77C\\Sphere.h",
+              "ViewState": "AgIAADYAAAAAAAAAAAAAAFEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2024-11-22T04:59:19.797Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Sphere.cpp",
+              "DocumentMoniker": "C:\\Users\\yeongmok\\Documents\\\uCE74\uCE74\uC624\uD1A1 \uBC1B\uC740 \uD30C\uC77C\\Sphere.cpp",
+              "RelativeDocumentMoniker": "..\\..\\Documents\\\uCE74\uCE74\uC624\uD1A1 \uBC1B\uC740 \uD30C\uC77C\\Sphere.cpp",
+              "ToolTip": "C:\\Users\\yeongmok\\Documents\\\uCE74\uCE74\uC624\uD1A1 \uBC1B\uC740 \uD30C\uC77C\\Sphere.cpp",
+              "RelativeToolTip": "..\\..\\Documents\\\uCE74\uCE74\uC624\uD1A1 \uBC1B\uC740 \uD30C\uC77C\\Sphere.cpp",
+              "ViewState": "AgIAADUBAAAAAAAAAAAiwCEBAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2024-11-22T04:59:09.372Z",
               "EditorCaption": ""
             }
           ]

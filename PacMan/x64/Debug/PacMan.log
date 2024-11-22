@@ -1,8 +1,31 @@
 ﻿  Main.cpp
-C:\Users\yeongmok\Desktop\PacMan2024\PacMan\Main.cpp(100,47): warning C4267: '=': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\yeongmok\Desktop\PacMan2024\PacMan\Main.cpp(101,43): warning C4267: '=': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\yeongmok\Desktop\PacMan2024\PacMan\Main.cpp(255,43): warning C4244: '=': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\yeongmok\Desktop\PacMan2024\PacMan\Main.cpp(256,43): warning C4244: '=': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\yeongmok\Desktop\PacMan2024\PacMan\Main.cpp(263,43): warning C4244: '=': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\yeongmok\Desktop\PacMan2024\PacMan\Main.cpp(264,43): warning C4244: '=': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\yeongmok\Desktop\PacMan2024\PacMan\Main.cpp(143,47): warning C4267: '=': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\yeongmok\Desktop\PacMan2024\PacMan\Main.cpp(144,43): warning C4267: '=': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\yeongmok\Desktop\PacMan2024\PacMan\Main.cpp(295,51): warning C4244: '=': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\yeongmok\Desktop\PacMan2024\PacMan\Main.cpp(296,51): warning C4244: '=': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\yeongmok\Desktop\PacMan2024\PacMan\Main.cpp(300,57): warning C4244: '=': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\yeongmok\Desktop\PacMan2024\PacMan\Main.cpp(301,55): warning C4244: '=': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\yeongmok\Desktop\PacMan2024\PacMan\Main.cpp(304,57): warning C4244: '=': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\yeongmok\Desktop\PacMan2024\PacMan\Main.cpp(305,55): warning C4244: '=': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\yeongmok\Desktop\PacMan2024\PacMan\Main.cpp(308,55): warning C4244: '=': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\yeongmok\Desktop\PacMan2024\PacMan\Main.cpp(309,57): warning C4244: '=': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\yeongmok\Desktop\PacMan2024\PacMan\Main.cpp(312,55): warning C4244: '=': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\yeongmok\Desktop\PacMan2024\PacMan\Main.cpp(313,57): warning C4244: '=': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\yeongmok\Desktop\PacMan2024\PacMan\Main.cpp(316,55): warning C4244: '=': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\yeongmok\Desktop\PacMan2024\PacMan\Main.cpp(317,55): warning C4244: '=': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\yeongmok\Desktop\PacMan2024\PacMan\Main.cpp(322,124): warning C4244: '=': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\yeongmok\Desktop\PacMan2024\PacMan\Main.cpp(323,83): warning C4244: '=': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\yeongmok\Desktop\PacMan2024\PacMan\Main.cpp(326,124): warning C4244: '=': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\yeongmok\Desktop\PacMan2024\PacMan\Main.cpp(327,83): warning C4244: '=': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\yeongmok\Desktop\PacMan2024\PacMan\Main.cpp(330,83): warning C4244: '=': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\yeongmok\Desktop\PacMan2024\PacMan\Main.cpp(331,125): warning C4244: '=': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\yeongmok\Desktop\PacMan2024\PacMan\Main.cpp(334,83): warning C4244: '=': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\yeongmok\Desktop\PacMan2024\PacMan\Main.cpp(335,125): warning C4244: '=': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\yeongmok\Desktop\PacMan2024\PacMan\Main.cpp(338,55): warning C4244: '=': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\yeongmok\Desktop\PacMan2024\PacMan\Main.cpp(339,55): warning C4244: '=': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\yeongmok\Desktop\PacMan2024\PacMan\Main.cpp(343,42): warning C4244: '초기화 중': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\yeongmok\Desktop\PacMan2024\PacMan\Main.cpp(349,55): warning C4244: '=': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\yeongmok\Desktop\PacMan2024\PacMan\Main.cpp(350,55): warning C4244: '=': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\yeongmok\Desktop\PacMan2024\PacMan\Main.cpp(359,47): warning C4244: '=': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\yeongmok\Desktop\PacMan2024\PacMan\Main.cpp(360,47): warning C4244: '=': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
   PacMan.vcxproj -> C:\Users\yeongmok\Desktop\PacMan2024\x64\Debug\PacMan.exe

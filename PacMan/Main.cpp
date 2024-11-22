@@ -4,6 +4,7 @@
 #include <iostream>
 #include <iomanip>
 #include <sstream>
+#include <vector>
 
 #include "Map.h"
 #include "Sphere.h"
@@ -14,8 +15,6 @@
 const int FPS = 60;
 int sTime = 0;
 int eTime = 0;
-int dTime = 0;
-int pTime = 0;
 
 Light light(BOUNDARY_X, BOUNDARY_Y, BOUNDARY_X / 2, GL_LIGHT0);
 
@@ -23,7 +22,12 @@ Map map1;
 Map map;
 
 PacMan pacman(BLOCK_SIZE / 2.0f, 20, 20, false);
-Ghost blinky(BLOCK_SIZE / 2.0f, 20, 20, Ghost::STATE::CHASE, Ghost::STATE::SCATTER);
+Ghost blinky(BLOCK_SIZE / 2.0f, 20, 20, -250, 280, Ghost::STATE::CHASE, Ghost::STATE::SCATTER);
+Ghost pinky(BLOCK_SIZE / 2.0f, 20, 20, -250, -280, Ghost::STATE::CHASE, Ghost::STATE::SCATTER);
+Ghost inky(BLOCK_SIZE / 2.0f, 20, 20, 250, 280, Ghost::STATE::CHASE, Ghost::STATE::SCATTER);
+Ghost clyde(BLOCK_SIZE / 2.0f, 20, 20, 250, -280, Ghost::STATE::CHASE, Ghost::STATE::SCATTER);
+
+std::vector<Ghost*> Ghosts;
 
 CollisionHandler colhandler;
 
@@ -61,6 +65,45 @@ void initialize() {
     blinky.setIndexPosition(1, 1);
     blinky.setVelocity(Vector3f(0.0f, 0.0f, 0.0f));
     blinky.setMTL(mtl);
+
+    // Ghost: pinky
+    mtl.setEmission(1.0f, 0.2f, 0.8f, 1.0f);
+    mtl.setAmbient(0.5f, 0.1f, 0.4f, 1.0f);
+    mtl.setDiffuse(1.0f, 0.2f, 0.8f, 1.0f);
+    mtl.setSpecular(1.0f, 0.6f, 0.9f, 1.0f);
+    mtl.setShininess(30.0f);
+
+    pinky.setIndexPosition(1, NUM_COL - 2); // NUM_ROW - 2 ,1
+    pinky.setVelocity(Vector3f(0.0f, 0.0f, 0.0f));
+    pinky.setMTL(mtl);
+
+    // Ghost: inky
+    mtl.setEmission(0.0f, 0.2f, 0.2f, 1.0f);
+    mtl.setAmbient(0.0f, 0.3f, 0.3f, 1.0f);
+    mtl.setDiffuse(0.0f, 0.8f, 0.8f, 1.0f);
+    mtl.setSpecular(0.0f, 0.8f, 0.8f, 1.0f);
+    mtl.setShininess(90.0f);
+
+    inky.setIndexPosition(NUM_ROW - 2, 1);
+    inky.setVelocity(Vector3f(0.0f, 0.0f, 0.0f));
+    inky.setMTL(mtl);
+
+    // Ghost: clyde
+    mtl.setEmission(0.0f, 0.1f, 0.0f, 1.0f);
+    mtl.setAmbient(0.0f, 0.2f, 0.0f, 1.0f);
+    mtl.setDiffuse(0.0f, 0.8f, 0.0f, 1.0f);
+    mtl.setSpecular(0.5f, 1.0f, 0.5f, 1.0f);
+    mtl.setShininess(80.0f);
+
+    clyde.setIndexPosition(NUM_ROW - 2, NUM_COL - 2);
+    clyde.setVelocity(Vector3f(0.0f, 0.0f, 0.0f));
+    clyde.setMTL(mtl);
+
+    //put ghosts in the ghosts vector
+    Ghosts.push_back(&blinky);
+    Ghosts.push_back(&pinky);
+    Ghosts.push_back(&inky);
+    Ghosts.push_back(&clyde);
 
     std::array<std::array<tileType, MAP_WIDTH>, MAP_HEIGHT> idxMap1 = { {
         {w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w},
@@ -110,26 +153,18 @@ void updateDirectionOfPacMan() {
     case Sphere::DIRECTION::NONE:
         break;
     case Sphere::DIRECTION::LEFT:
-        if (pacman.getCurrentDirection() == Sphere::DIRECTION::RIGHT)
-            break;
         if (map.getBlock(pacman.getYIndex() % NUM_COL, (pacman.getXIndex() - 1) % NUM_ROW).isPassable())
             pacman.updateDirection();
         break;
     case Sphere::DIRECTION::RIGHT:
-        if (pacman.getCurrentDirection() == Sphere::DIRECTION::LEFT)
-            break;
         if (map.getBlock(pacman.getYIndex() % NUM_COL, (pacman.getXIndex() + 1) % NUM_ROW).isPassable())
             pacman.updateDirection();
         break;
     case Sphere::DIRECTION::UP:
-        if (pacman.getCurrentDirection() == Sphere::DIRECTION::DOWN)
-            break;
         if (map.getBlock((pacman.getYIndex() - 1) % NUM_COL, pacman.getXIndex()% NUM_ROW).isPassable())
             pacman.updateDirection();
         break;
     case Sphere::DIRECTION::DOWN:
-        if (pacman.getCurrentDirection() == Sphere::DIRECTION::UP)
-            break;
         if (map.getBlock((pacman.getYIndex() + 1) % NUM_COL, pacman.getXIndex() % NUM_ROW).isPassable())
             pacman.updateDirection();
         break;
@@ -137,34 +172,35 @@ void updateDirectionOfPacMan() {
 }
 
 void updateDirectionOfGhost(Ghost& ghost, int targetX, int targetY) {
-    //std::cout << "updateDirectionOfGhost" << std::endl;
+    /*std::cout << "updateDirectionOfGhost" << std::endl;*/
     //std::cout << "targetX: " << targetX << " targetY: " << targetY << std::endl;
+    /*std::cout << "curridxX: " << ghost.getXIndex() << "curridxY: " << ghost.getYIndex() << std::endl;*/
     int idx[2] = { ghost.getXIndex(), ghost.getYIndex() };
 
-    int lIdx[2] = { (idx[0] - 1) % NUM_COL, idx[1] % NUM_COL };
-    int tIdx[2] = { idx[0] % NUM_COL , (idx[1] - 1) % NUM_COL };
-    int rIdx[2] = { (idx[0] + 1) % NUM_COL , idx[1] % NUM_COL };
-    int bIdx[2] = { idx[0] % NUM_COL , (idx[1] + 1) % NUM_COL };
-
+    int lIdx[2] = { (idx[0] - 1), idx[1] };
+    int tIdx[2] = { idx[0] , (idx[1] - 1) };
+    int rIdx[2] = { (idx[0] + 1) , idx[1] };
+    int bIdx[2] = { idx[0] , (idx[1] + 1) };
+    /*std::cout << "ltrb" << std::endl;*/
     const Block& lBlock = map.getBlock(lIdx[1], lIdx[0]);
     const Block& tBlock = map.getBlock(tIdx[1], tIdx[0]);
     const Block& rBlock = map.getBlock(rIdx[1], rIdx[0]);
     const Block& bBlock = map.getBlock(bIdx[1], bIdx[0]);
-
     int arr[4] = { 0,0,0,0 };
+
     Sphere::DIRECTION arrD[4] = { Sphere::DIRECTION::LEFT, Sphere::DIRECTION::UP, Sphere::DIRECTION::RIGHT, Sphere::DIRECTION::DOWN };
+
     std::vector<Block> blocks;
     blocks.push_back(lBlock);
     blocks.push_back(tBlock);
     blocks.push_back(rBlock);
     blocks.push_back(bBlock);
+    arr[0] = ((lIdx[0] - NUM_ROW / 2) * BLOCK_SIZE - targetX) * ((lIdx[0] - NUM_ROW / 2) * BLOCK_SIZE - targetX) + ((NUM_COL / 2 - lIdx[1]) * BLOCK_SIZE - targetY) * ((NUM_COL / 2 - lIdx[1]) * BLOCK_SIZE - targetY);
+    arr[1] = ((tIdx[0] - NUM_ROW / 2) * BLOCK_SIZE - targetX) * ((tIdx[0] - NUM_ROW / 2) * BLOCK_SIZE - targetX) + ((NUM_COL / 2 - tIdx[1]) * BLOCK_SIZE - targetY) * ((NUM_COL / 2 - tIdx[1]) * BLOCK_SIZE - targetY);
+    arr[2] = ((rIdx[0] - NUM_ROW / 2) * BLOCK_SIZE - targetX) * ((rIdx[0] - NUM_ROW / 2) * BLOCK_SIZE - targetX) + ((NUM_COL / 2 - rIdx[1]) * BLOCK_SIZE - targetY) * ((NUM_COL / 2 - rIdx[1]) * BLOCK_SIZE - targetY);
+    arr[3] = ((bIdx[0] - NUM_ROW / 2) * BLOCK_SIZE - targetX) * ((bIdx[0] - NUM_ROW / 2) * BLOCK_SIZE - targetX) + ((NUM_COL / 2 - bIdx[1]) * BLOCK_SIZE - targetY) * ((NUM_COL / 2 - bIdx[1]) * BLOCK_SIZE - targetY);
 
-    arr[0] = ((lIdx[0] - NUM_ROW / 2) * 40 - targetX) * ((lIdx[0] - NUM_ROW / 2) * 40 - targetX) + ((NUM_COL / 2 - lIdx[1]) * 40 - targetY) * ((NUM_COL / 2 - lIdx[1]) * 40 - targetY);
-    arr[1] = ((tIdx[0] - NUM_ROW / 2) * 0 - targetX) * ((tIdx[0] - NUM_ROW / 2) * 40 - targetX) + ((NUM_COL / 2 - tIdx[1]) * 40 - targetY) * ((NUM_COL / 2 - tIdx[1]) * 40 - targetY);
-    arr[2] = ((rIdx[0] - NUM_ROW / 2) * 40 - targetX) * ((rIdx[0] - NUM_ROW / 2) * 40 - targetX) + ((NUM_COL / 2 - rIdx[1]) * 40 - targetY) * ((NUM_COL / 2 - rIdx[1]) * 40 - targetY);
-    arr[3] = ((bIdx[0] - NUM_ROW / 2) * 40 - targetX) * ((bIdx[0] - NUM_ROW / 2) * 40 - targetX) + ((NUM_COL / 2 - bIdx[1]) * 40 - targetY) * ((NUM_COL / 2 - bIdx[1]) * 40 - targetY);
-
-    Sphere::DIRECTION CurrDir = blinky.getCurrentDirection();
+    Sphere::DIRECTION CurrDir = ghost.getCurrentDirection();
     Sphere::DIRECTION OppDir = Sphere::DIRECTION::NONE;
 
     if (CurrDir == Sphere::DIRECTION::LEFT)
@@ -175,18 +211,16 @@ void updateDirectionOfGhost(Ghost& ghost, int targetX, int targetY) {
         OppDir = Sphere::DIRECTION::DOWN;
     else if (CurrDir == Sphere::DIRECTION::DOWN)
         OppDir = Sphere::DIRECTION::UP;
-    //cout << "opposite direction" << OppDir << endl;
-
+    /*std::cout << "oppdir" << std::endl;*/
     Sphere::DIRECTION newDir = Sphere::DIRECTION::NONE;
     int MinDistSquare = -1;
     int MaxDistSquare = -1;
-    if ((blinky.getState() == Ghost::STATE::CHASE) || (blinky.getState() == Ghost::STATE::SCATTER) || (blinky.getState() == Ghost::STATE::EATEN)) {
+    if ((ghost.getState() == Ghost::STATE::CHASE) || (ghost.getState() == Ghost::STATE::SCATTER) || (ghost.getState() == Ghost::STATE::EATEN)) {
         for (int i = 0; i < 4; i++) {
-            //cout << blocks[i].isPassable() << endl;
-            //cout << "ditance square: " << arr[i] << endl;
+            /*cout << blocks[i].isPassable() << endl;*/
+            /*cout << "ditance square: " << arr[i] << endl;*/
             if (blocks[i].isPassable() && arrD[i] != OppDir) {
                 if (MinDistSquare == -1) {
-                    //cout << "yes" << endl;
                     MinDistSquare = arr[i];
                     newDir = arrD[i];
                 }
@@ -199,13 +233,12 @@ void updateDirectionOfGhost(Ghost& ghost, int targetX, int targetY) {
             }
         }
     }
-    else if (blinky.getState() == Ghost::STATE::FRIGHTENED) {
+    else if (ghost.getState() == Ghost::STATE::FRIGHTENED) {
         for (int i = 0; i < 4; i++) {
-            //cout << blocks[i].isPassable() << endl;
-            //cout << "ditance square: " << arr[i] << endl;
+            /*cout << blocks[i].isPassable() << endl;*/
+            /*cout << "ditance square: " << arr[i] << endl;*/
             if (blocks[i].isPassable() && arrD[i] != OppDir) {
                 if (MaxDistSquare == -1) {
-                    //cout << "yes" << endl;
                     MaxDistSquare = arr[i];
                     newDir = arrD[i];
                 }
@@ -218,10 +251,10 @@ void updateDirectionOfGhost(Ghost& ghost, int targetX, int targetY) {
             }
         }
     }
-    //cout << "blinky's ndwDir" << newDir << endl;
-    blinky.setNextDirection(newDir);
-    blinky.updateDirection();
-    blinky.updateVelocity();
+    /*cout << "blinky's ndwDir" << newDir << endl;*/
+    ghost.setNextDirection(newDir);
+    ghost.updateDirection();
+    ghost.updateVelocity();
 }
 
 void updatePacMan() {
@@ -241,56 +274,121 @@ void updatePacMan() {
 }
 
 void updateGhost() {
-    //cout << "updateGhost" << endl;
-    bool bNoDir = blinky.getCurrentDirection() == Sphere::DIRECTION::NONE;
-    blinky.updateCheck();
-    bool bIdxPosUpdated = blinky.isIndexPositionUpdated();
-   // cout << "bdixposupdate" << bIdxPosUpdated << endl;
-    if (bNoDir || bIdxPosUpdated) {
-        //cout << "set New Target" << endl;
-        int targetX = 0;
-        int targetY = 0;
-        // set target
-        if (blinky.getState() == Ghost::STATE::CHASE) {
-            targetX = pacman.getCenter()[0];
-            targetY = pacman.getCenter()[1];
+    /*cout << "updateGhost" << endl;*/
+    for (int i = 0; i < 4; i++) {
+        bool bNoDir = Ghosts[i]->getCurrentDirection() == Sphere::DIRECTION::NONE;
+        /*cout << endl;
+        cout << endl;
+        cout << "bNoDir : " << bNoDir << endl;*/
+        Ghosts[i]->updateCheck();
+        bool bIdxPosUpdated = Ghosts[i]->isIndexPositionUpdated();
+        /*cout << "bdixposupdate : " << bIdxPosUpdated << endl;*/
+        if (bNoDir || bIdxPosUpdated) {
+            //cout << "set New Target" << endl;
+            //cout << endl;
+            //cout << "ith : " << i << endl;
+            int targetX = 0;
+            int targetY = 0;
+            // set target
+            if (Ghosts[i]->getState() == Ghost::STATE::CHASE) {
+                if (i == 0) {
+                    targetX = pacman.getCenter()[0];
+                    targetY = pacman.getCenter()[1];
+                }
+                else if (i == 1) {
+                    if (pacman.getCurrentDirection() == Sphere::DIRECTION::LEFT) {
+                        targetX = pacman.getCenter()[0] - BLOCK_SIZE * 4;
+                        targetY = pacman.getCenter()[1];
+                    }
+                    else if (pacman.getCurrentDirection() == Sphere::DIRECTION::RIGHT) {
+                        targetX = pacman.getCenter()[0] + BLOCK_SIZE * 4;
+                        targetY = pacman.getCenter()[1];
+                    }
+                    else if (pacman.getCurrentDirection() == Sphere::DIRECTION::UP) {
+                        targetX = pacman.getCenter()[0];
+                        targetY = pacman.getCenter()[1] + BLOCK_SIZE * 4;
+                    }
+                    else if (pacman.getCurrentDirection() == Sphere::DIRECTION::DOWN) {
+                        targetX = pacman.getCenter()[0];
+                        targetY = pacman.getCenter()[1] - BLOCK_SIZE * 4;
+                    }
+                    else {
+                        targetX = pacman.getCenter()[0];
+                        targetY = pacman.getCenter()[1];
+                    }
+                }
+                else if (i == 2) {
+                    if (pacman.getCurrentDirection() == Sphere::DIRECTION::LEFT) {
+                        targetX = (pacman.getCenter()[0] - BLOCK_SIZE * 2 - blinky.getCenter()[0]) + pacman.getCenter()[0] - BLOCK_SIZE * 2;
+                        targetY = (pacman.getCenter()[1] - blinky.getCenter()[1]) + pacman.getCenter()[1];
+                    }
+                    else if (pacman.getCurrentDirection() == Sphere::DIRECTION::RIGHT) {
+                        targetX = (pacman.getCenter()[0] + BLOCK_SIZE * 2 - blinky.getCenter()[0]) + pacman.getCenter()[0] + BLOCK_SIZE * 2;
+                        targetY = (pacman.getCenter()[1] - blinky.getCenter()[1]) + pacman.getCenter()[1];
+                    }
+                    else if (pacman.getCurrentDirection() == Sphere::DIRECTION::UP) {
+                        targetX = (pacman.getCenter()[0] - blinky.getCenter()[0]) + pacman.getCenter()[0];
+                        targetY = (pacman.getCenter()[1] + BLOCK_SIZE * 2 - -blinky.getCenter()[1]) + pacman.getCenter()[1] + BLOCK_SIZE * 2;
+                    }
+                    else if (pacman.getCurrentDirection() == Sphere::DIRECTION::DOWN) {
+                        targetX = (pacman.getCenter()[0] - blinky.getCenter()[0]) + pacman.getCenter()[0];
+                        targetY = (pacman.getCenter()[1] - BLOCK_SIZE * 2 - -blinky.getCenter()[1]) + pacman.getCenter()[1] - BLOCK_SIZE * 2;;
+                    }
+                    else {
+                        targetX = pacman.getCenter()[0];
+                        targetY = pacman.getCenter()[1];
+                    }
+                }
+                else if (i == 3) {
+                    int PCDistanceSquare = (Ghosts[i]->getCenter()[0] - pacman.getCenter()[0]) * (Ghosts[i]->getCenter()[0] - pacman.getCenter()[0]) + (Ghosts[i]->getCenter()[1] - pacman.getCenter()[1]) * (Ghosts[i]->getCenter()[1] - pacman.getCenter()[1]);
+                    if (PCDistanceSquare <= (BLOCK_SIZE * 8) * (BLOCK_SIZE * 8)) {
+                        targetX = Ghosts[i]->getOriginX();
+                        targetY = Ghosts[i]->getOriginY();
+                    }
+                    else {
+                        targetX = pacman.getCenter()[0];
+                        targetY = pacman.getCenter()[1];
+                    }
+                }
+            }
+            else if (Ghosts[i]->getState() == Ghost::STATE::SCATTER) {
+                targetX = Ghosts[i]->getOriginX();
+                targetY = Ghosts[i]->getOriginY();
+            }
+            else if (Ghosts[i]->getState() == Ghost::STATE::FRIGHTENED) { // Frightened 일때는 모두 동일하게 팩맨 위치로 설정해서 팩맨에서 멀어지도록
+                targetX = pacman.getCenter()[0];
+                targetY = pacman.getCenter()[1];
+            }
+            else if (Ghosts[i]->getState() == Ghost::STATE::EATEN) { //이거도 전부 동일
+                targetX = 0;
+                targetY = 0;
+            }
+            updateDirectionOfGhost(*Ghosts[i], targetX, targetY);
         }
-        else if (blinky.getState() == Ghost::STATE::SCATTER) {
-            targetX = -120;
-            targetY = 120;
-        }
-        else if (blinky.getState() == Ghost::STATE::FRIGHTENED) {
-            targetX = pacman.getCenter()[0];
-            targetY = pacman.getCenter()[1];
-        }
-        else if (blinky.getState() == Ghost::STATE::EATEN) {
-            targetX = 0;
-            targetY = 0;
-        }
-
-        updateDirectionOfGhost(blinky, targetX, targetY);
+        Ghosts[i]->move();
     }
-    blinky.move();
 }
 
 void updateState() {
-    if ((blinky.getState() == Ghost::STATE::CHASE) && (eTime - dTime) >= 10000 - pTime) {
-        blinky.setState(Ghost::STATE::SCATTER);
-        dTime = eTime;
-        pTime = 0;
-    }
-    else if ((blinky.getState() == Ghost::STATE::SCATTER) && (eTime - dTime) >= 10000 - pTime) {
-        blinky.setState(Ghost::STATE::CHASE);
-        dTime = eTime;
-        pTime = 0;
-    }
-    else if ((blinky.getState() == Ghost::STATE::FRIGHTENED) && (eTime - dTime) >= 5000) {
-        blinky.setState(blinky.getprevState());
-        dTime = eTime;
-    }
-    else if ((blinky.getState() == Ghost::STATE::EATEN) && (blinky.getXIndex() == NUM_COL / 2) && (blinky.getYIndex() == NUM_ROW / 2)) {
-        blinky.setState(blinky.getprevState());
-        dTime = eTime;
+    for (auto ghost : Ghosts) {
+        if ((ghost->getState() == Ghost::STATE::CHASE) && (eTime - ghost->getdTime()) >= 10000 - ghost->getpTime()) {
+            ghost->setState(Ghost::STATE::SCATTER);
+            ghost->setdTime(eTime);
+            ghost->setpTime(0);
+        }
+        else if ((ghost->getState() == Ghost::STATE::SCATTER) && (eTime - ghost->getdTime()) >= 10000 - ghost->getpTime()) {
+            ghost->setState(Ghost::STATE::CHASE);
+            ghost->setdTime(eTime);
+            ghost->setpTime(0);
+        }
+        else if ((ghost->getState() == Ghost::STATE::FRIGHTENED) && (eTime - ghost->getdTime()) >= 5000) {
+            ghost->setState(ghost->getprevState());
+            ghost->setdTime(eTime);
+        }
+        else if ((ghost->getState() == Ghost::STATE::EATEN) && (ghost->getXIndex() == 13) && (ghost->getYIndex() == 13)) {
+            ghost->setState(ghost->getprevState());
+            ghost->setdTime(eTime);
+        }
     }
 
 }
@@ -303,8 +401,10 @@ void idle() {
         /* Implement: update direction and move Pac-Man */
         updatePacMan();
         updateGhost();
-        if (blinky.getState() != Ghost::STATE::EATEN)
-            colhandler(pacman, blinky);
+        for (auto ghost : Ghosts) {
+            if (ghost->getState() != Ghost::STATE::EATEN)
+                colhandler(pacman, *ghost);
+        }
         updateState();
 
         sTime = eTime;
@@ -363,7 +463,9 @@ void display() {
 
     map1.drawCoins();
     pacman.draw();
-    blinky.draw();
+    for (auto ghost : Ghosts) {
+        ghost->draw();
+    }
 
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_LIGHTING);
@@ -392,11 +494,13 @@ void keyboardDown(unsigned char key, int x, int y) {
     case 27:
         exit(0);
     case '1':
-        if ((blinky.getState() == Ghost::STATE::CHASE) || (blinky.getState() == Ghost::STATE::SCATTER)) {
-            blinky.saveState();
-            blinky.setState(Ghost::STATE::FRIGHTENED); //Frightened로 바뀔 때, 이전 상태를 저장, state 전환, 흘러간 시간을 pTime에 저장, dTime 초기화
-            pTime = (eTime - dTime);
-            dTime = eTime;
+        for (auto ghost : Ghosts) {
+            if ((ghost->getState() == Ghost::STATE::CHASE) || (ghost->getState() == Ghost::STATE::SCATTER)) {
+                ghost->saveState();
+                ghost->setState(Ghost::STATE::FRIGHTENED); //Frightened로 바뀔 때, 이전 상태를 저장, state 전환, 흘러간 시간을 pTime에 저장, dTime 초기화
+                ghost->setpTime(eTime - ghost->getdTime());
+                ghost->setdTime(eTime);
+            }
         }
     default:
         break;
