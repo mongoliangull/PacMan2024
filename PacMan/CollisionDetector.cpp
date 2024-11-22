@@ -7,7 +7,7 @@ bool CollisionDetector::operator()(const PacMan& pacman, const Map& map) {
 		return false;
 		break;
 	case Sphere::DIRECTION::LEFT:
-		if (map.getBlock(pacman.getYIndex() % NUM_COL, (pacman.getXIndex() - 1) % NUM_ROW).isPassable())
+		if (map.getBlock(pacman.getYIndex() % NUM_COL, (pacman.getXIndex() - 1 + NUM_ROW) % NUM_ROW).isPassable())
 			return true;
 		else
 			return false;
@@ -19,13 +19,15 @@ bool CollisionDetector::operator()(const PacMan& pacman, const Map& map) {
 			return false;
 		break;
 	case Sphere::DIRECTION::UP:
-		if (map.getBlock((pacman.getYIndex() - 1) % NUM_COL, pacman.getXIndex() % NUM_ROW).isPassable())
+		if (map.getBlock((pacman.getYIndex() - 1 + NUM_COL) % NUM_COL, pacman.getXIndex() % NUM_ROW).isPassable())
 			return true;
 		else
 			return false;
 		break;
 	case Sphere::DIRECTION::DOWN:
-		if (map.getBlock((pacman.getYIndex() + 1) % NUM_COL, pacman.getXIndex() % NUM_ROW).isPassable())
+		if (map.getBlock((pacman.getYIndex() + 1) % NUM_COL, pacman.getXIndex() % NUM_ROW).isHalfWall())
+			return false;
+		else if (map.getBlock((pacman.getYIndex() + 1) % NUM_COL, pacman.getXIndex() % NUM_ROW).isPassable())
 			return true;
 		else
 			return false;

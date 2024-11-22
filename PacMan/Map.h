@@ -16,11 +16,13 @@ public:
 	void setHeight(float h);
 	void setIsPassable(bool i);
 	void setIsCoin(typeCoin c);
+	void setHalfWall(bool b);
 	
 
 	float getWidth() const;
 	float getHeight() const;
 	bool isPassable() const;
+	bool isHalfWall() const;
 	typeCoin isCoin() const;
 
 	void draw() const;
@@ -29,6 +31,7 @@ private:
 	float x, y, z;
 	float width, height;
 	bool bPassable;
+	bool bHalfWall;
 	typeCoin tCoin;
 };
 

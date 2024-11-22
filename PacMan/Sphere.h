@@ -52,6 +52,7 @@ public:
 	PacMan(float r, int sl, int st, bool bCol);
 
 	void setCollided(bool bCol);
+	bool getCollided();
 
 	virtual void draw() const;
 

@@ -33,9 +33,6 @@ void CollisionHandler::operator()(PacMan& pacman, Ghost& ghost) {
 			ghost.setState(Ghost::STATE::EATEN);
 		}
 	}
-	else {
-		pacman.setCollided(false);
-	}
 }
 
 void CollisionHandler::operator()(PacMan& pacman, CoinCollection& coins) {

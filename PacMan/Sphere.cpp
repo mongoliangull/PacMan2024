@@ -73,7 +73,7 @@ void Sphere::updateCheck() {
 				setIndexPosition(idxPos[0] - 1, idxPos[1]);
 			else {
 				setIndexPosition(NUM_ROW - 1, idxPos[1]);
-				center[0] = BLOCK_SIZE * (NUM_ROW / 2.0f - 0.5f);
+				center[0] = -LEFT_BOUNDARY - BLOCK_SIZE / 2.0f;
 			}
 			bInxPosUpdated = true;
 		}
@@ -179,6 +179,10 @@ PacMan::PacMan(float r, int sl, int st, bool bCol) {
 
 void PacMan::setCollided(bool bCol) {
 	bCollided = bCol;
+}
+
+bool PacMan::getCollided() {
+	return bCollided;
 }
 
 void PacMan::draw() const {
