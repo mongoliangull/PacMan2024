@@ -7,25 +7,25 @@ bool CollisionDetector::operator()(const PacMan& pacman, const Map& map) {
 		return false;
 		break;
 	case Sphere::DIRECTION::LEFT:
-		if (map.getBlock(pacman.getYIndex(), pacman.getXIndex() - 1).isPassable())
+		if (map.getBlock(pacman.getYIndex() % NUM_COL, (pacman.getXIndex() - 1) % NUM_ROW).isPassable())
 			return true;
 		else
 			return false;
 		break;
 	case Sphere::DIRECTION::RIGHT:
-		if (map.getBlock(pacman.getYIndex(), pacman.getXIndex() + 1).isPassable())
+		if (map.getBlock(pacman.getYIndex() % NUM_COL, (pacman.getXIndex() + 1) % NUM_ROW).isPassable())
 			return true;
 		else
 			return false;
 		break;
 	case Sphere::DIRECTION::UP:
-		if (map.getBlock(pacman.getYIndex() - 1, pacman.getXIndex()).isPassable())
+		if (map.getBlock((pacman.getYIndex() - 1) % NUM_COL, pacman.getXIndex() % NUM_ROW).isPassable())
 			return true;
 		else
 			return false;
 		break;
 	case Sphere::DIRECTION::DOWN:
-		if (map.getBlock(pacman.getYIndex() + 1, pacman.getXIndex()).isPassable())
+		if (map.getBlock((pacman.getYIndex() + 1) % NUM_COL, pacman.getXIndex() % NUM_ROW).isPassable())
 			return true;
 		else
 			return false;
@@ -42,6 +42,23 @@ bool CollisionDetector::operator()(const PacMan& pacman, const Ghost& ghost) {
 		return true;
 	}
 	else{
+		return false;
+	}
+}
+
+bool CollisionDetector::operator() (const PacMan& pacman, const Coin* coin) {
+	if (coin == nullptr) {
+		return false;
+	}
+
+	float distanceBetweenCenterSq = (pacman.getCenter()[0] - coin->getCenter()[0]) * (pacman.getCenter()[0] - coin->getCenter()[0])
+		+ (pacman.getCenter()[1] - coin->getCenter()[1]) * (pacman.getCenter()[1] - coin->getCenter()[1]);
+	float DiameterSq = (pacman.getRadius() + coin->getRadius()) * (pacman.getRadius() + coin->getRadius());
+
+	if (distanceBetweenCenterSq < DiameterSq) {
+		return true;
+	}
+	else {
 		return false;
 	}
 }

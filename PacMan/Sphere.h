@@ -1,5 +1,8 @@
 #pragma once
 
+#include <vector>
+#include <algorithm>
+
 #include "Shape3d.h"
 
 class Sphere : public Shape3D
@@ -79,9 +82,55 @@ private:
 
 class Coin : public Sphere {
 public:
-	Coin(float r, int sl, int st, const Vector3f& pos);
+	Coin(float r, int sl, int st, const Vector3f& pos, int idxX, int idxY, bool big);
+
+	void setIsBig(bool big);
+	void setIdxPos(int x, int y);
+
+	bool isBig() const;
+	int getIdxX() const;
+	int getIdxY() const;
 
 	virtual void draw() const;
-private:
 
+private:
+	int idxPos[2];
+	bool bBig;
+};
+
+class CoinCollection {
+public:
+	std::vector<Coin> coins;
+
+	void addCoin(float r, int sl, int st, const Vector3f& pos, int idxX, int idxY, bool big) {
+		coins.emplace_back(r, sl, st, pos, idxX, idxY, big);
+	}
+
+	const Coin* findCoin(int idxX, int idxY) const {
+		auto it = std::find_if(coins.begin(), coins.end(), [idxX, idxY](const Coin& coin) {
+			return coin.getIdxX() == idxX && coin.getIdxY() == idxY;
+		});
+		
+		if (it != coins.end()) {
+			return &(*it);
+		}
+		else {
+			return nullptr;
+		}
+	}
+
+	void removeCoin(const Coin* coinPtr) {
+		if (!coinPtr) {
+			return; // Invalid pointer, cannot remove
+		}
+
+		// Use std::find to locate the coin in the collection
+		auto it = std::find_if(coins.begin(), coins.end(), [coinPtr](const Coin& coin) {
+			return &coin == coinPtr; // Compare the address of the coin
+			});
+
+		if (it != coins.end()) {
+			coins.erase(it); // Remove the coin from the collection
+		}
+	}
 };

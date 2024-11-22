@@ -15,6 +15,10 @@ void Block::setIsPassable(bool i) {
 	bPassable = i;
 }
 
+void Block::setIsCoin(Block::typeCoin c) {
+	tCoin = c;
+}
+
 float Block::getWidth() const {
 	return width;
 }
@@ -25,6 +29,10 @@ float Block::getHeight() const {
 
 bool Block::isPassable() const {
 	return bPassable;
+}
+
+Block::typeCoin Block::isCoin() const {
+	return tCoin;
 }
 
 void Block::draw() const {
@@ -65,11 +73,13 @@ void Map::createMap(const std::array<std::array<tileType, MAP_WIDTH>, MAP_HEIGHT
 				break;
 			case o:
 				tiles[row][col].setIsPassable(true);
-				smallCoins.emplace_back(2.5f, 20, 20, posCenter);
+				tiles[row][col].setIsCoin(Block::sCoin);
+				smallCoins.addCoin(2.5f, 20, 20, posCenter, row, col, false);
 				break;
 			case O:
 				tiles[row][col].setIsPassable(true);
-				bigCoins.emplace_back(6.0f, 20, 20, posCenter);
+				tiles[row][col].setHeight(Block::bCoin);
+				bigCoins.addCoin(6.0f, 20, 20, posCenter, row, col, true);
 				break;
 			}
 		}
@@ -89,11 +99,11 @@ void Map::draw() const {
 }
 
 void Map::drawCoins() const {
-	for (const auto& coin : smallCoins) {
+	for (const auto& coin : smallCoins.coins) {
 		coin.draw();
 	}
 	
-	for (const auto& COIN : bigCoins) {
+	for (const auto& COIN : bigCoins.coins) {
 		COIN.draw();
 	}
 }

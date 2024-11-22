@@ -27,7 +27,9 @@ Ghost blinky(BLOCK_SIZE / 2.0f, 20, 20, Ghost::STATE::CHASE, Ghost::STATE::SCATT
 
 CollisionHandler colhandler;
 
-int score = 1234;
+int numSmallCoins = 0;
+int numBigCoins = 0;
+int score = 0;
 
 using namespace std;
 
@@ -95,6 +97,9 @@ void initialize() {
     } };
     map1.createMap(idxMap1);
 
+    numSmallCoins = map1.smallCoins.coins.size();
+    numBigCoins = map1.bigCoins.coins.size();
+
     map = map1;
 }
 
@@ -107,39 +112,39 @@ void updateDirectionOfPacMan() {
     case Sphere::DIRECTION::LEFT:
         if (pacman.getCurrentDirection() == Sphere::DIRECTION::RIGHT)
             break;
-        if (map.getBlock(pacman.getYIndex(), pacman.getXIndex() - 1).isPassable())
+        if (map.getBlock(pacman.getYIndex() % NUM_COL, (pacman.getXIndex() - 1) % NUM_ROW).isPassable())
             pacman.updateDirection();
         break;
     case Sphere::DIRECTION::RIGHT:
         if (pacman.getCurrentDirection() == Sphere::DIRECTION::LEFT)
             break;
-        if (map.getBlock(pacman.getYIndex(), pacman.getXIndex() + 1).isPassable())
+        if (map.getBlock(pacman.getYIndex() % NUM_COL, (pacman.getXIndex() + 1) % NUM_ROW).isPassable())
             pacman.updateDirection();
         break;
     case Sphere::DIRECTION::UP:
         if (pacman.getCurrentDirection() == Sphere::DIRECTION::DOWN)
             break;
-        if (map.getBlock(pacman.getYIndex() - 1, pacman.getXIndex()).isPassable())
+        if (map.getBlock((pacman.getYIndex() - 1) % NUM_COL, pacman.getXIndex()% NUM_ROW).isPassable())
             pacman.updateDirection();
         break;
     case Sphere::DIRECTION::DOWN:
         if (pacman.getCurrentDirection() == Sphere::DIRECTION::UP)
             break;
-        if (map.getBlock(pacman.getYIndex() + 1, pacman.getXIndex()).isPassable())
+        if (map.getBlock((pacman.getYIndex() + 1) % NUM_COL, pacman.getXIndex() % NUM_ROW).isPassable())
             pacman.updateDirection();
         break;
     }
 }
 
 void updateDirectionOfGhost(Ghost& ghost, int targetX, int targetY) {
-    std::cout << "updateDirectionOfGhost" << std::endl;
-    std::cout << "targetX: " << targetX << " targetY: " << targetY << std::endl;
+    //std::cout << "updateDirectionOfGhost" << std::endl;
+    //std::cout << "targetX: " << targetX << " targetY: " << targetY << std::endl;
     int idx[2] = { ghost.getXIndex(), ghost.getYIndex() };
 
-    int lIdx[2] = { idx[0] - 1, idx[1] };
-    int tIdx[2] = { idx[0] , idx[1] - 1 };
-    int rIdx[2] = { idx[0] + 1 , idx[1] };
-    int bIdx[2] = { idx[0] , idx[1] + 1 };
+    int lIdx[2] = { (idx[0] - 1) % NUM_COL, idx[1] % NUM_COL };
+    int tIdx[2] = { idx[0] % NUM_COL , (idx[1] - 1) % NUM_COL };
+    int rIdx[2] = { (idx[0] + 1) % NUM_COL , idx[1] % NUM_COL };
+    int bIdx[2] = { idx[0] % NUM_COL , (idx[1] + 1) % NUM_COL };
 
     const Block& lBlock = map.getBlock(lIdx[1], lIdx[0]);
     const Block& tBlock = map.getBlock(tIdx[1], tIdx[0]);
@@ -170,18 +175,18 @@ void updateDirectionOfGhost(Ghost& ghost, int targetX, int targetY) {
         OppDir = Sphere::DIRECTION::DOWN;
     else if (CurrDir == Sphere::DIRECTION::DOWN)
         OppDir = Sphere::DIRECTION::UP;
-    cout << "opposite direction" << OppDir << endl;
+    //cout << "opposite direction" << OppDir << endl;
 
     Sphere::DIRECTION newDir = Sphere::DIRECTION::NONE;
     int MinDistSquare = -1;
     int MaxDistSquare = -1;
     if ((blinky.getState() == Ghost::STATE::CHASE) || (blinky.getState() == Ghost::STATE::SCATTER) || (blinky.getState() == Ghost::STATE::EATEN)) {
         for (int i = 0; i < 4; i++) {
-            cout << blocks[i].isPassable() << endl;
-            cout << "ditance square: " << arr[i] << endl;
+            //cout << blocks[i].isPassable() << endl;
+            //cout << "ditance square: " << arr[i] << endl;
             if (blocks[i].isPassable() && arrD[i] != OppDir) {
                 if (MinDistSquare == -1) {
-                    cout << "yes" << endl;
+                    //cout << "yes" << endl;
                     MinDistSquare = arr[i];
                     newDir = arrD[i];
                 }
@@ -196,11 +201,11 @@ void updateDirectionOfGhost(Ghost& ghost, int targetX, int targetY) {
     }
     else if (blinky.getState() == Ghost::STATE::FRIGHTENED) {
         for (int i = 0; i < 4; i++) {
-            cout << blocks[i].isPassable() << endl;
-            cout << "ditance square: " << arr[i] << endl;
+            //cout << blocks[i].isPassable() << endl;
+            //cout << "ditance square: " << arr[i] << endl;
             if (blocks[i].isPassable() && arrD[i] != OppDir) {
                 if (MaxDistSquare == -1) {
-                    cout << "yes" << endl;
+                    //cout << "yes" << endl;
                     MaxDistSquare = arr[i];
                     newDir = arrD[i];
                 }
@@ -213,7 +218,7 @@ void updateDirectionOfGhost(Ghost& ghost, int targetX, int targetY) {
             }
         }
     }
-    cout << "blinky's ndwDir" << newDir << endl;
+    //cout << "blinky's ndwDir" << newDir << endl;
     blinky.setNextDirection(newDir);
     blinky.updateDirection();
     blinky.updateVelocity();
@@ -236,13 +241,13 @@ void updatePacMan() {
 }
 
 void updateGhost() {
-    cout << "updateGhost" << endl;
+    //cout << "updateGhost" << endl;
     bool bNoDir = blinky.getCurrentDirection() == Sphere::DIRECTION::NONE;
     blinky.updateCheck();
     bool bIdxPosUpdated = blinky.isIndexPositionUpdated();
-    cout << "bdixposupdate" << bIdxPosUpdated << endl;
+   // cout << "bdixposupdate" << bIdxPosUpdated << endl;
     if (bNoDir || bIdxPosUpdated) {
-        cout << "set New Target" << endl;
+        //cout << "set New Target" << endl;
         int targetX = 0;
         int targetY = 0;
         // set target
@@ -328,6 +333,17 @@ void display() {
 
 	// 2D draw
     map1.draw();
+
+    colhandler(pacman, map1.smallCoins);
+    if (numSmallCoins > map1.smallCoins.coins.size()) {
+        numSmallCoins--;
+        score += 10;
+    }
+    colhandler(pacman, map1.bigCoins);
+    if (numBigCoins > map1.bigCoins.coins.size()) {
+        numBigCoins--;
+        score += 50;
+    }
 
     if (blinky.getState() == Ghost::STATE::CHASE)
         displayCharacters(GLUT_BITMAP_HELVETICA_18, "key 1: change ghost's state (Chase)", -270, -340);

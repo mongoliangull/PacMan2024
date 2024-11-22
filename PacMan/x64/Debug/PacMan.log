@@ -1,2 +1,8 @@
-﻿  Sphere.cpp
+﻿  Main.cpp
+C:\Users\yeongmok\Desktop\PacMan2024\PacMan\Main.cpp(100,47): warning C4267: '=': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\yeongmok\Desktop\PacMan2024\PacMan\Main.cpp(101,43): warning C4267: '=': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\yeongmok\Desktop\PacMan2024\PacMan\Main.cpp(255,43): warning C4244: '=': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\yeongmok\Desktop\PacMan2024\PacMan\Main.cpp(256,43): warning C4244: '=': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\yeongmok\Desktop\PacMan2024\PacMan\Main.cpp(263,43): warning C4244: '=': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\yeongmok\Desktop\PacMan2024\PacMan\Main.cpp(264,43): warning C4244: '=': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
   PacMan.vcxproj -> C:\Users\yeongmok\Desktop\PacMan2024\x64\Debug\PacMan.exe
