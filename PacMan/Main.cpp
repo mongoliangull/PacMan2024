@@ -15,6 +15,10 @@
 const int FPS = 60;
 int sTime = 0;
 int eTime = 0;
+int stageClearTime = 0;
+int gameOverTime = 0;
+bool displayStageClear = false;
+bool displayGameOver = false;
 
 enum GameState {
     MENU,
@@ -117,7 +121,7 @@ void initialize() {
         Ghosts.push_back(&inky);
         Ghosts.push_back(&clyde);
     }
-    if (currentState == PLAYING1) {
+    if (currentState == PLAYING2) {
         std::array<std::array<tileType, MAP_WIDTH>, MAP_HEIGHT> idxMap1 = { {
             {w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w},
             {w, o, o, o, o, o, o, o, o, o, o, o, o, w, w, o, o, o, o, o, o, o, o, o, o, o, o, w},
@@ -158,7 +162,7 @@ void initialize() {
 
         map = map1;
     }
-    else if (currentState == PLAYING2) {
+    else if (currentState == PLAYING1) {
         std::array<std::array<tileType, MAP_WIDTH>, MAP_HEIGHT> idxMap2 = { {
             {w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w},
             {w, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, w},
@@ -388,11 +392,15 @@ void updateGhost() {
             // set target
             if (Ghosts[i]->getState() == Ghost::STATE::EATEN) { //이거도 전부 동일
                 targetX = 0;
-                targetY = 0;
+                targetY = 20;
             }
-            else if (Ghosts[i]->getCenter()[0] >= -60.0f && Ghosts[i]->getCenter()[0] <= 60.0f && Ghosts[i]->getCenter()[1] >= -10.0f && Ghosts[i]->getCenter()[1] <= 70.0f) { // If ghost is in Ghost room
-                targetX = 0;
-                targetY = 80;
+            else if (Ghosts[i]->getCenter()[0] >= -60.0f && Ghosts[i]->getCenter()[0] <= 60.0f && Ghosts[i]->getCenter()[1] >= -10.0f && Ghosts[i]->getCenter()[1] <= 70.0f) { // If ghost is in Ghost roo
+                targetX = 0; 
+                targetY = 90.0f;
+            }
+            else if (Ghosts[i]->getCenter()[0] >= -60.0f && Ghosts[i]->getCenter()[0] <= 60.0f && Ghosts[i]->getCenter()[1] >= 70.0f && Ghosts[i]->getCenter()[1] <= 100.0f) {
+                targetX = (Ghosts[i]->getCurrentDirection() == Sphere::DIRECTION::LEFT) ? -70.0f : 70.0f;
+                targetY = 90.0f;
             }
             else if (Ghosts[i]->getState() == Ghost::STATE::CHASE) {
                 if (i == 0) {
@@ -503,8 +511,11 @@ void idle() {
             updatePacMan();
             updateGhost();
             for (auto ghost : Ghosts) {
-                if (ghost->getState() != Ghost::STATE::EATEN)
+                if (ghost->getState() != Ghost::STATE::EATEN) {
                     colhandler(pacman, *ghost);
+                    if (ghost->getState() == Ghost::STATE::FRIGHTENED)
+                        pacman.setCollided(false);
+                }
             }
 
             if (pacman.getCollided()) {
@@ -514,7 +525,8 @@ void idle() {
                     pacman.setCollided(false);
                 }
                 else {
-                    exit(0);
+                    gameOverTime = eTime;
+                    displayGameOver = true;
                 }
             }
 
@@ -589,11 +601,13 @@ void display() {
                 }
             }
         }
-
+        /*
         if (numSmallCoins == 0 && numBigCoins == 0) {
             currentState = static_cast<GameState>(static_cast<int>(currentState) + 1);
             initialize();
+            revival();
         }
+        */
 
         if (blinky.getState() == Ghost::STATE::CHASE)
             displayCharacters(GLUT_BITMAP_HELVETICA_18, "key 1: change ghost's state (Chase)", -270, -340);
@@ -652,6 +666,36 @@ void display() {
         glRasterPos2f(-270, 320);
         for (int i = 0; i < scoreString.size(); i++)
             glutBitmapCharacter(GLUT_BITMAP_9_BY_15, scoreString[i]);
+
+
+        // stage clear && game over
+        if (displayStageClear) {
+            int elapsed = eTime - stageClearTime;
+            displayCharacters(GLUT_BITMAP_HELVETICA_18, "STAGE CLEAR!", -60, 0);
+            if (elapsed > 5000) { // 5 seconds
+                displayStageClear = false;
+                currentState = static_cast<GameState>(static_cast<int>(currentState) + 1);
+                initialize();
+                revival();
+                // Reset the game or go to next stage if applicable
+            }
+        }
+        else if (displayGameOver) {
+            int elapsed = eTime - gameOverTime;
+            std::cout << elapsed << std::endl;
+            displayCharacters(GLUT_BITMAP_HELVETICA_18, "GAME OVER", -60, 0);
+            if (elapsed > 5000) { // 5 seconds
+                exit(0); // Game over, exit to menu or close window
+            }
+        }
+        else {
+            if (numSmallCoins == 0 && numBigCoins == 0 && !displayStageClear) {
+                // Player has cleared the stage
+                stageClearTime = eTime; // Set the time to show stage clear message
+                displayStageClear = true;
+                // You might want to reset the game state or go to the next level here
+            }
+        }
 
         glutSwapBuffers();
     }
