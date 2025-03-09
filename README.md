@@ -1,5 +1,7 @@
 # PacMan2024
 
+https://github.com/user-attachments/assets/f1043f35-2dcc-47f7-9dd8-5443ebfc8571
+
 ## Introduction
 This project is a recreation of the classic Pac-Man game, originally developed and released by Namco in 1980. The game follows the traditional Pac-Man mechanics, where players navigate a maze while avoiding ghosts and consuming dots. The game includes various features such as ghost AI, scoring mechanics, and different game states.
 
