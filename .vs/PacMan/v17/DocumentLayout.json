@@ -1,0 +1,37 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\yeongmok\\Desktop\\PacMan2024\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{2CCC7864-05F1-4DE6-93EC-BF2E4354AC52}|PacMan\\PacMan.vcxproj|C:\\Users\\yeongmok\\Desktop\\PacMan2024\\PacMan\\Main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{2CCC7864-05F1-4DE6-93EC-BF2E4354AC52}|PacMan\\PacMan.vcxproj|solutionrelative:PacMan\\Main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Main.cpp",
+              "DocumentMoniker": "C:\\Users\\yeongmok\\Desktop\\PacMan2024\\PacMan\\Main.cpp",
+              "RelativeDocumentMoniker": "PacMan\\Main.cpp",
+              "ToolTip": "C:\\Users\\yeongmok\\Desktop\\PacMan2024\\PacMan\\Main.cpp",
+              "RelativeToolTip": "PacMan\\Main.cpp",
+              "ViewState": "AgIAAAAAAAAAAAAAAADwvwAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-03-09T13:33:07.688Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
