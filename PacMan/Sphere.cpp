@@ -257,6 +257,10 @@ void Ghost::setState(STATE s) {
 	state = s;
 }
 
+void Ghost::setSaveState(STATE s) {
+	prevstate = s;
+}
+
 void Ghost::saveState() {
 	prevstate = state;
 }
@@ -294,18 +298,35 @@ int Ghost::getOriginY() {
 }
 
 void Ghost::updateVelocity() {
-	if (state != Ghost::STATE::EATEN) {
+	if (state == Ghost::STATE::EATEN) {
 		if (currDirection == Sphere::DIRECTION::LEFT) {
-			setVelocity(-0.1f * MOVE_SPEED, 0.0f * MOVE_SPEED, 0);
+			setVelocity(-0.7f * MOVE_SPEED, 0.0f * MOVE_SPEED, 0);
 		}
 		else if (currDirection == Sphere::DIRECTION::RIGHT) {
-			setVelocity(+0.1f * MOVE_SPEED, 0.0f * MOVE_SPEED, 0);
+			setVelocity(+0.7f * MOVE_SPEED, 0.0f * MOVE_SPEED, 0);
 		}
 		else if (currDirection == Sphere::DIRECTION::UP) {
-			setVelocity(0.0f * MOVE_SPEED, 0.1f * MOVE_SPEED, 0);
+			setVelocity(0.0f * MOVE_SPEED, 0.7f * MOVE_SPEED, 0);
 		}
 		else if (currDirection == Sphere::DIRECTION::DOWN) {
-			setVelocity(0.0f * MOVE_SPEED, -0.1f * MOVE_SPEED, 0);
+			setVelocity(0.0f * MOVE_SPEED, -0.7f * MOVE_SPEED, 0);
+		}
+		else {
+			setVelocity(0.0f * MOVE_SPEED, 0.0f * MOVE_SPEED, 0);
+		}
+	}
+	else if (state == Ghost::STATE::FRIGHTENED) {
+		if (currDirection == Sphere::DIRECTION::LEFT) {
+			setVelocity(-0.05f * MOVE_SPEED, 0.0f * MOVE_SPEED, 0);
+		}
+		else if (currDirection == Sphere::DIRECTION::RIGHT) {
+			setVelocity(+0.05f * MOVE_SPEED, 0.0f * MOVE_SPEED, 0);
+		}
+		else if (currDirection == Sphere::DIRECTION::UP) {
+			setVelocity(0.0f * MOVE_SPEED, 0.05f * MOVE_SPEED, 0);
+		}
+		else if (currDirection == Sphere::DIRECTION::DOWN) {
+			setVelocity(0.0f * MOVE_SPEED, -0.05f * MOVE_SPEED, 0);
 		}
 		else {
 			setVelocity(0.0f * MOVE_SPEED, 0.0f * MOVE_SPEED, 0);
@@ -313,16 +334,16 @@ void Ghost::updateVelocity() {
 	}
 	else {
 		if (currDirection == Sphere::DIRECTION::LEFT) {
-			setVelocity(-0.5f * MOVE_SPEED, 0.0f * MOVE_SPEED, 0);
+			setVelocity(-0.105f * MOVE_SPEED, 0.0f * MOVE_SPEED, 0);
 		}
 		else if (currDirection == Sphere::DIRECTION::RIGHT) {
-			setVelocity(+0.5f * MOVE_SPEED, 0.0f * MOVE_SPEED, 0);
+			setVelocity(+0.105f * MOVE_SPEED, 0.0f * MOVE_SPEED, 0);
 		}
 		else if (currDirection == Sphere::DIRECTION::UP) {
-			setVelocity(0.0f * MOVE_SPEED, 0.5f * MOVE_SPEED, 0);
+			setVelocity(0.0f * MOVE_SPEED, 0.105f * MOVE_SPEED, 0);
 		}
 		else if (currDirection == Sphere::DIRECTION::DOWN) {
-			setVelocity(0.0f * MOVE_SPEED, -0.5f * MOVE_SPEED, 0);
+			setVelocity(0.0f * MOVE_SPEED, -0.105f * MOVE_SPEED, 0);
 		}
 		else {
 			setVelocity(0.0f * MOVE_SPEED, 0.0f * MOVE_SPEED, 0);
