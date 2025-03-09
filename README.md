@@ -36,13 +36,10 @@ Ghosts have different movement patterns depending on their state:
 - Life system for Pac-Man
 - Victory condition when all dots are eaten
 
-## Bonus Features (If Implemented)
+## Bonus Features
 - 3D rendering with lighting and shading
-- Sound effects and background music
 - Multiple game levels
 - Scoreboard for tracking high scores
-- Multiplayer functionality
-- Special Pac-Man abilities
 
 ## How to Play
 1. Start the game and control Pac-Man using the arrow keys.
