@@ -69,6 +69,7 @@ public:
 	Ghost(float r, int sl, int st, int ctX, int ctY, STATE s, STATE ps);
 
 	void setState(STATE s);
+	void setSaveState(STATE s);
 	void saveState();
 	STATE getState() const;
 	void updateVelocity();

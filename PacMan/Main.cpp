@@ -5,6 +5,8 @@
 #include <iomanip>
 #include <sstream>
 #include <vector>
+#include <fstream>
+#include <map>
 
 #include "Map.h"
 #include "Sphere.h"
@@ -19,18 +21,23 @@ int stageClearTime = 0;
 int gameOverTime = 0;
 bool displayStageClear = false;
 bool displayGameOver = false;
+std::string userInput;
+bool cursorVisible = true;
+int lastTime = 0;
 
 enum GameState {
     MENU,
     PLAYING1,
-    PLAYING2
+    PLAYING2,
+    GETNAME,
+    SCOREBOARD
 };
 
 GameState currentState = MENU; // init
 
 Light light(BOUNDARY_X, BOUNDARY_Y, BOUNDARY_X / 2, GL_LIGHT0);
 
-Map map;
+Map map0;
 Map map1;
 Map map2;
 
@@ -53,7 +60,7 @@ int score = 0;
 using namespace std;
 
 void initialize() {
-    if (currentState != MENU) {
+    if ((currentState == PLAYING1)|| (currentState == PLAYING2)) {
         // Light
         light.setAmbient(0.5f, 0.5f, 0.5f, 1.0f);
         light.setDiffuse(0.7f, 0.7f, 0.7f, 1.0f);
@@ -160,7 +167,7 @@ void initialize() {
         numSmallCoins = map1.smallCoins.coins.size();
         numBigCoins = map1.bigCoins.coins.size();
 
-        map = map1;
+        map0 = map1;
     }
     else if (currentState == PLAYING1) {
         std::array<std::array<tileType, MAP_WIDTH>, MAP_HEIGHT> idxMap2 = { {
@@ -201,7 +208,7 @@ void initialize() {
         numSmallCoins = map2.smallCoins.coins.size();
         numBigCoins = map2.bigCoins.coins.size();
 
-        map = map2;
+        map0 = map2;
     }
 }
 
@@ -211,6 +218,7 @@ void revival() {
     pacman.setIndexPosition(14, 23);
     pacman.setVelocity(Vector3f(0.0f, 0.0f, 0.0f));
     pacman.setCurrentDirection(Sphere::DIRECTION::NONE);
+    pacman.setNextDirection(Sphere::DIRECTION::NONE);
     pacman.setCenter(10.0f, -160.0f, 0.0f);
 
     blinky.setIndexPosition(1, 1);
@@ -218,14 +226,17 @@ void revival() {
     blinky.setCurrentDirection(Sphere::DIRECTION::NONE);
     blinky.setCenter(-250.0f, 280.0f, 0.0f);
     blinky.setState(Ghost::STATE::CHASE);
+    blinky.setSaveState(Ghost::STATE::SCATTER);
     blinky.setpTime(0);
     blinky.setdTime(eTime);
 
+    
     pinky.setIndexPosition(1, NUM_COL - 2);
     pinky.setVelocity(Vector3f(0.0f, 0.0f, 0.0f));
     pinky.setCurrentDirection(Sphere::DIRECTION::NONE);
     pinky.setCenter(-250.0f, -280.0f, 0.0f);
-    blinky.setState(Ghost::STATE::CHASE);
+    pinky.setState(Ghost::STATE::CHASE);
+    pinky.setSaveState(Ghost::STATE::SCATTER);
     pinky.setpTime(0);
     pinky.setdTime(eTime);
 
@@ -234,6 +245,7 @@ void revival() {
     inky.setCurrentDirection(Sphere::DIRECTION::NONE);
     inky.setCenter(250.0f, 280.0f, 0.0f);
     inky.setState(Ghost::STATE::CHASE);
+    inky.setSaveState(Ghost::STATE::SCATTER);
     inky.setpTime(0);
     inky.setdTime(eTime);
 
@@ -242,6 +254,7 @@ void revival() {
     clyde.setCurrentDirection(Sphere::DIRECTION::NONE);
     clyde.setCenter(250.0f, -280.0f, 0.0f);
     clyde.setState(Ghost::STATE::CHASE);
+    clyde.setSaveState(Ghost::STATE::SCATTER);
     clyde.setpTime(0);
     clyde.setdTime(eTime);
 }
@@ -253,19 +266,19 @@ void updateDirectionOfPacMan() {
     case Sphere::DIRECTION::NONE:
         break;
     case Sphere::DIRECTION::LEFT:
-        if (map.getBlock(pacman.getYIndex() % NUM_COL, (pacman.getXIndex() - 1 + NUM_ROW) % NUM_ROW).isPassable())
+        if (map0.getBlock(pacman.getYIndex() % NUM_COL, (pacman.getXIndex() - 1 + NUM_ROW) % NUM_ROW).isPassable())
             pacman.updateDirection();
         break;
     case Sphere::DIRECTION::RIGHT:
-        if (map.getBlock(pacman.getYIndex() % NUM_COL, (pacman.getXIndex() + 1) % NUM_ROW).isPassable())
+        if (map0.getBlock(pacman.getYIndex() % NUM_COL, (pacman.getXIndex() + 1) % NUM_ROW).isPassable())
             pacman.updateDirection();
         break;
     case Sphere::DIRECTION::UP:
-        if (map.getBlock((pacman.getYIndex() - 1 + NUM_COL) % NUM_COL, pacman.getXIndex()% NUM_ROW).isPassable())
+        if (map0.getBlock((pacman.getYIndex() - 1 + NUM_COL) % NUM_COL, pacman.getXIndex()% NUM_ROW).isPassable())
             pacman.updateDirection();
         break;
     case Sphere::DIRECTION::DOWN:
-        if (!map.getBlock((pacman.getYIndex() + 1) % NUM_COL, pacman.getXIndex() % NUM_ROW).isHalfWall() && map.getBlock((pacman.getYIndex() + 1) % NUM_COL, pacman.getXIndex() % NUM_ROW).isPassable())
+        if (!map0.getBlock((pacman.getYIndex() + 1) % NUM_COL, pacman.getXIndex() % NUM_ROW).isHalfWall() && map0.getBlock((pacman.getYIndex() + 1) % NUM_COL, pacman.getXIndex() % NUM_ROW).isPassable())
             pacman.updateDirection();
         break;
     }
@@ -282,10 +295,10 @@ void updateDirectionOfGhost(Ghost& ghost, int targetX, int targetY) {
     int rIdx[2] = { (idx[0] + 1) % NUM_ROW , idx[1] % NUM_COL};
     int bIdx[2] = { idx[0] % NUM_ROW , (idx[1] + 1) % NUM_COL};
     /*std::cout << "ltrb" << std::endl;*/
-    const Block& lBlock = map.getBlock(lIdx[1], lIdx[0]);
-    const Block& tBlock = map.getBlock(tIdx[1], tIdx[0]);
-    const Block& rBlock = map.getBlock(rIdx[1], rIdx[0]);
-    const Block& bBlock = map.getBlock(bIdx[1], bIdx[0]);
+    const Block& lBlock = map0.getBlock(lIdx[1], lIdx[0]);
+    const Block& tBlock = map0.getBlock(tIdx[1], tIdx[0]);
+    const Block& rBlock = map0.getBlock(rIdx[1], rIdx[0]);
+    const Block& bBlock = map0.getBlock(bIdx[1], bIdx[0]);
     int arr[4] = { 0,0,0,0 };
 
     Sphere::DIRECTION arrD[4] = { Sphere::DIRECTION::LEFT, Sphere::DIRECTION::UP, Sphere::DIRECTION::RIGHT, Sphere::DIRECTION::DOWN };
@@ -367,113 +380,105 @@ void updatePacMan() {
 
     if (bNoDir || bIdxPosUpdated) {
         updateDirectionOfPacMan();
-        colhandler(pacman, map);
+        colhandler(pacman, map0);
     }
 
     pacman.move();
 }
 
 void updateGhost() {
-    /*cout << "updateGhost" << endl;*/
     for (int i = 0; i < 4; i++) {
-        bool bNoDir = Ghosts[i]->getCurrentDirection() == Sphere::DIRECTION::NONE;
-        /*cout << endl;
-        cout << endl;
-        cout << "bNoDir : " << bNoDir << endl;*/
-        Ghosts[i]->updateCheck();
-        bool bIdxPosUpdated = Ghosts[i]->isIndexPositionUpdated();
-        /*cout << "bdixposupdate : " << bIdxPosUpdated << endl;*/
-        if (bNoDir || bIdxPosUpdated) {
-            //cout << "set New Target" << endl;
-            //cout << endl;
-            //cout << "ith : " << i << endl;
-            int targetX = 0;
-            int targetY = 0;
-            // set target
-            if (Ghosts[i]->getState() == Ghost::STATE::EATEN) { //이거도 전부 동일
-                targetX = 0;
-                targetY = 20;
-            }
-            else if (Ghosts[i]->getCenter()[0] >= -60.0f && Ghosts[i]->getCenter()[0] <= 60.0f && Ghosts[i]->getCenter()[1] >= -10.0f && Ghosts[i]->getCenter()[1] <= 70.0f) { // If ghost is in Ghost roo
-                targetX = 0; 
-                targetY = 90.0f;
-            }
-            else if (Ghosts[i]->getCenter()[0] >= -60.0f && Ghosts[i]->getCenter()[0] <= 60.0f && Ghosts[i]->getCenter()[1] >= 70.0f && Ghosts[i]->getCenter()[1] <= 100.0f) {
-                targetX = (Ghosts[i]->getCurrentDirection() == Sphere::DIRECTION::LEFT) ? -70.0f : 70.0f;
-                targetY = 90.0f;
-            }
-            else if (Ghosts[i]->getState() == Ghost::STATE::CHASE) {
-                if (i == 0) {
+            bool bNoDir = Ghosts[i]->getCurrentDirection() == Sphere::DIRECTION::NONE;
+            Ghosts[i]->updateCheck();
+            bool bIdxPosUpdated = Ghosts[i]->isIndexPositionUpdated();
+            if ((bNoDir || bIdxPosUpdated) && (!displayStageClear)) {
+                int targetX = 0;
+                int targetY = 0;
+                // set target
+                if (Ghosts[i]->getState() == Ghost::STATE::EATEN) {
+                    targetX = 0;
+                    targetY = 20;
+                }
+                else if (Ghosts[i]->getCenter()[0] >= -60.0f && Ghosts[i]->getCenter()[0] <= 60.0f && Ghosts[i]->getCenter()[1] >= -10.0f && Ghosts[i]->getCenter()[1] <= 70.0f) { // If ghost is in Ghost roo
+                    targetX = 0;
+                    targetY = 90.0f;
+                }
+                else if (Ghosts[i]->getCenter()[0] >= -60.0f && Ghosts[i]->getCenter()[0] <= 60.0f && Ghosts[i]->getCenter()[1] >= 70.0f && Ghosts[i]->getCenter()[1] <= 100.0f) {
+                    targetX = (Ghosts[i]->getCurrentDirection() == Sphere::DIRECTION::LEFT) ? -70.0f : 70.0f;
+                    targetY = 90.0f;
+                }
+                else if (Ghosts[i]->getState() == Ghost::STATE::CHASE) {
+                    if (i == 0) {
+                        targetX = pacman.getCenter()[0];
+                        targetY = pacman.getCenter()[1];
+                    }
+                    else if (i == 1) {
+                        if (pacman.getCurrentDirection() == Sphere::DIRECTION::LEFT) {
+                            targetX = pacman.getCenter()[0] - BLOCK_SIZE * 4;
+                            targetY = pacman.getCenter()[1];
+                        }
+                        else if (pacman.getCurrentDirection() == Sphere::DIRECTION::RIGHT) {
+                            targetX = pacman.getCenter()[0] + BLOCK_SIZE * 4;
+                            targetY = pacman.getCenter()[1];
+                        }
+                        else if (pacman.getCurrentDirection() == Sphere::DIRECTION::UP) {
+                            targetX = pacman.getCenter()[0];
+                            targetY = pacman.getCenter()[1] + BLOCK_SIZE * 4;
+                        }
+                        else if (pacman.getCurrentDirection() == Sphere::DIRECTION::DOWN) {
+                            targetX = pacman.getCenter()[0];
+                            targetY = pacman.getCenter()[1] - BLOCK_SIZE * 4;
+                        }
+                        else {
+                            targetX = pacman.getCenter()[0];
+                            targetY = pacman.getCenter()[1];
+                        }
+                    }
+                    else if (i == 2) {
+                        if (pacman.getCurrentDirection() == Sphere::DIRECTION::LEFT) {
+                            targetX = (pacman.getCenter()[0] - BLOCK_SIZE * 2 - blinky.getCenter()[0]) + pacman.getCenter()[0] - BLOCK_SIZE * 2;
+                            targetY = (pacman.getCenter()[1] - blinky.getCenter()[1]) + pacman.getCenter()[1];
+                        }
+                        else if (pacman.getCurrentDirection() == Sphere::DIRECTION::RIGHT) {
+                            targetX = (pacman.getCenter()[0] + BLOCK_SIZE * 2 - blinky.getCenter()[0]) + pacman.getCenter()[0] + BLOCK_SIZE * 2;
+                            targetY = (pacman.getCenter()[1] - blinky.getCenter()[1]) + pacman.getCenter()[1];
+                        }
+                        else if (pacman.getCurrentDirection() == Sphere::DIRECTION::UP) {
+                            targetX = (pacman.getCenter()[0] - blinky.getCenter()[0]) + pacman.getCenter()[0];
+                            targetY = (pacman.getCenter()[1] + BLOCK_SIZE * 2 - -blinky.getCenter()[1]) + pacman.getCenter()[1] + BLOCK_SIZE * 2;
+                        }
+                        else if (pacman.getCurrentDirection() == Sphere::DIRECTION::DOWN) {
+                            targetX = (pacman.getCenter()[0] - blinky.getCenter()[0]) + pacman.getCenter()[0];
+                            targetY = (pacman.getCenter()[1] - BLOCK_SIZE * 2 - -blinky.getCenter()[1]) + pacman.getCenter()[1] - BLOCK_SIZE * 2;;
+                        }
+                        else {
+                            targetX = pacman.getCenter()[0];
+                            targetY = pacman.getCenter()[1];
+                        }
+                    }
+                    else if (i == 3) {
+                        int PCDistanceSquare = (Ghosts[i]->getCenter()[0] - pacman.getCenter()[0]) * (Ghosts[i]->getCenter()[0] - pacman.getCenter()[0]) + (Ghosts[i]->getCenter()[1] - pacman.getCenter()[1]) * (Ghosts[i]->getCenter()[1] - pacman.getCenter()[1]);
+                        if (PCDistanceSquare <= (BLOCK_SIZE * 8) * (BLOCK_SIZE * 8)) {
+                            targetX = Ghosts[i]->getOriginX();
+                            targetY = Ghosts[i]->getOriginY();
+                        }
+                        else {
+                            targetX = pacman.getCenter()[0];
+                            targetY = pacman.getCenter()[1];
+                        }
+                    }
+                }
+                else if (Ghosts[i]->getState() == Ghost::STATE::SCATTER) {
+                    targetX = Ghosts[i]->getOriginX();
+                    targetY = Ghosts[i]->getOriginY();
+                }
+                else if (Ghosts[i]->getState() == Ghost::STATE::FRIGHTENED) { // Frightened 일때는 모두 동일하게 팩맨 위치로 설정해서 팩맨에서 멀어지도록
                     targetX = pacman.getCenter()[0];
                     targetY = pacman.getCenter()[1];
                 }
-                else if (i == 1) {
-                    if (pacman.getCurrentDirection() == Sphere::DIRECTION::LEFT) {
-                        targetX = pacman.getCenter()[0] - BLOCK_SIZE * 4;
-                        targetY = pacman.getCenter()[1];
-                    }
-                    else if (pacman.getCurrentDirection() == Sphere::DIRECTION::RIGHT) {
-                        targetX = pacman.getCenter()[0] + BLOCK_SIZE * 4;
-                        targetY = pacman.getCenter()[1];
-                    }
-                    else if (pacman.getCurrentDirection() == Sphere::DIRECTION::UP) {
-                        targetX = pacman.getCenter()[0];
-                        targetY = pacman.getCenter()[1] + BLOCK_SIZE * 4;
-                    }
-                    else if (pacman.getCurrentDirection() == Sphere::DIRECTION::DOWN) {
-                        targetX = pacman.getCenter()[0];
-                        targetY = pacman.getCenter()[1] - BLOCK_SIZE * 4;
-                    }
-                    else {
-                        targetX = pacman.getCenter()[0];
-                        targetY = pacman.getCenter()[1];
-                    }
-                }
-                else if (i == 2) {
-                    if (pacman.getCurrentDirection() == Sphere::DIRECTION::LEFT) {
-                        targetX = (pacman.getCenter()[0] - BLOCK_SIZE * 2 - blinky.getCenter()[0]) + pacman.getCenter()[0] - BLOCK_SIZE * 2;
-                        targetY = (pacman.getCenter()[1] - blinky.getCenter()[1]) + pacman.getCenter()[1];
-                    }
-                    else if (pacman.getCurrentDirection() == Sphere::DIRECTION::RIGHT) {
-                        targetX = (pacman.getCenter()[0] + BLOCK_SIZE * 2 - blinky.getCenter()[0]) + pacman.getCenter()[0] + BLOCK_SIZE * 2;
-                        targetY = (pacman.getCenter()[1] - blinky.getCenter()[1]) + pacman.getCenter()[1];
-                    }
-                    else if (pacman.getCurrentDirection() == Sphere::DIRECTION::UP) {
-                        targetX = (pacman.getCenter()[0] - blinky.getCenter()[0]) + pacman.getCenter()[0];
-                        targetY = (pacman.getCenter()[1] + BLOCK_SIZE * 2 - -blinky.getCenter()[1]) + pacman.getCenter()[1] + BLOCK_SIZE * 2;
-                    }
-                    else if (pacman.getCurrentDirection() == Sphere::DIRECTION::DOWN) {
-                        targetX = (pacman.getCenter()[0] - blinky.getCenter()[0]) + pacman.getCenter()[0];
-                        targetY = (pacman.getCenter()[1] - BLOCK_SIZE * 2 - -blinky.getCenter()[1]) + pacman.getCenter()[1] - BLOCK_SIZE * 2;;
-                    }
-                    else {
-                        targetX = pacman.getCenter()[0];
-                        targetY = pacman.getCenter()[1];
-                    }
-                }
-                else if (i == 3) {
-                    int PCDistanceSquare = (Ghosts[i]->getCenter()[0] - pacman.getCenter()[0]) * (Ghosts[i]->getCenter()[0] - pacman.getCenter()[0]) + (Ghosts[i]->getCenter()[1] - pacman.getCenter()[1]) * (Ghosts[i]->getCenter()[1] - pacman.getCenter()[1]);
-                    if (PCDistanceSquare <= (BLOCK_SIZE * 8) * (BLOCK_SIZE * 8)) {
-                        targetX = Ghosts[i]->getOriginX();
-                        targetY = Ghosts[i]->getOriginY();
-                    }
-                    else {
-                        targetX = pacman.getCenter()[0];
-                        targetY = pacman.getCenter()[1];
-                    }
-                }
+                updateDirectionOfGhost(*Ghosts[i], targetX, targetY);
             }
-            else if (Ghosts[i]->getState() == Ghost::STATE::SCATTER) {
-                targetX = Ghosts[i]->getOriginX();
-                targetY = Ghosts[i]->getOriginY();
-            }
-            else if (Ghosts[i]->getState() == Ghost::STATE::FRIGHTENED) { // Frightened 일때는 모두 동일하게 팩맨 위치로 설정해서 팩맨에서 멀어지도록
-                targetX = pacman.getCenter()[0];
-                targetY = pacman.getCenter()[1];
-            }
-            updateDirectionOfGhost(*Ghosts[i], targetX, targetY);
-        }
-        Ghosts[i]->move();
+            Ghosts[i]->move();
     }
 }
 
@@ -502,19 +507,21 @@ void updateState() {
 }
 
 void idle() {
-    if (currentState != MENU) {
+    eTime = glutGet(GLUT_ELAPSED_TIME);
+    if ((currentState == PLAYING1)|| (currentState == PLAYING2)) {
         float spf = 1000.0f / FPS;
-        eTime = glutGet(GLUT_ELAPSED_TIME);
+        
 
         if (eTime - sTime > spf) {
-            /* Implement: update direction and move Pac-Man */
-            updatePacMan();
-            updateGhost();
-            for (auto ghost : Ghosts) {
-                if (ghost->getState() != Ghost::STATE::EATEN) {
-                    colhandler(pacman, *ghost);
-                    if (ghost->getState() == Ghost::STATE::FRIGHTENED)
-                        pacman.setCollided(false);
+            if (!(displayGameOver || displayStageClear)) {
+                updatePacMan();
+                updateGhost();
+                for (auto ghost : Ghosts) {
+                    if (ghost->getState() != Ghost::STATE::EATEN) {
+                        colhandler(pacman, *ghost);
+                        if (ghost->getState() == Ghost::STATE::FRIGHTENED)
+                            pacman.setCollided(false);
+                    }
                 }
             }
 
@@ -525,7 +532,8 @@ void idle() {
                     pacman.setCollided(false);
                 }
                 else {
-                    gameOverTime = eTime;
+                    if(gameOverTime == 0)
+                        gameOverTime = eTime;
                     displayGameOver = true;
                 }
             }
@@ -536,6 +544,21 @@ void idle() {
             glutPostRedisplay();
         }
     }
+    if (displayGameOver) {
+        int elapsed = eTime - gameOverTime;
+        if (elapsed > 5000) {
+            currentState = GETNAME;
+            displayGameOver = false;
+        }
+        glutPostRedisplay();
+
+    }
+    //if (displayGameOver || displayStageClear) {
+    //    for (auto ghost : Ghosts) {
+    //        ghost->setVelocity(Vector3f(0.0f, 0.0f, 0.0f));
+
+    //    }
+    //}
 }
 
 void displayCharacters(void* font, string str, float x, float y) {
@@ -547,7 +570,7 @@ void displayCharacters(void* font, string str, float x, float y) {
 
 void displayMenu() {
     glColor3f(1.0f, 1.0f, 1.0f); // Set color to white
-    glRasterPos2f(-50, 0); // Position for the text
+    glRasterPos2f(-43, 0); // Position for the text
     std::string title = "PAC-MAN";
     for (char c : title) {
         glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, c);
@@ -556,6 +579,113 @@ void displayMenu() {
     glRasterPos2f(-85, -50);
     std::string startPrompt = "Press ENTER to Start";
     for (char c : startPrompt) {
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, c);
+    }
+
+    glRasterPos2f(-84, -230);
+    std::string scoreboardPrompt = "Scoreboard : press s";
+    for (char c : scoreboardPrompt) {
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, c);
+    }
+
+    glutSwapBuffers();
+}
+
+void renderText(const std::string& text, float x, float y) {
+    glRasterPos2f(x, y);
+    for (char c : text) {
+        glutBitmapCharacter(GLUT_BITMAP_9_BY_15, c);
+    }
+}
+
+void timer(int value) {
+    int currentTime = glutGet(GLUT_ELAPSED_TIME);
+    if (currentTime - lastTime >= 500) {
+        cursorVisible = !cursorVisible;
+        lastTime = currentTime;
+        glutPostRedisplay();
+    }
+    glutTimerFunc(100, timer, 0);
+}
+
+
+void displayNameInput() {
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(-BOUNDARY_X, BOUNDARY_X, -BOUNDARY_Y, BOUNDARY_Y, -100.0, 100.0);
+    //gluOrtho2D(-BOUNDARY_X, BOUNDARY_X, -BOUNDARY_Y, BOUNDARY_Y);
+
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    
+    std::string displayText = "Player: " + userInput;
+    if (cursorVisible) {
+        displayText += "|"; 
+    }
+    glColor3f(1.0f, 1.0f, 1.0f);
+    renderText(displayText, -40.0f, 0.0f);
+
+    std::ostringstream oss;
+    oss << std::setw(6) << std::setfill('0') << score;
+    std::string scoreString = oss.str();                        // High score print
+    glRasterPos2f(-20.0f, -30.0f);
+    for (int i = 0; i < scoreString.size(); i++)
+        glutBitmapCharacter(GLUT_BITMAP_9_BY_15, scoreString[i]);
+
+    glutSwapBuffers();
+}
+
+void displayScoreBoard() {
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(-BOUNDARY_X, BOUNDARY_X, -BOUNDARY_Y, BOUNDARY_Y, -100.0, 100.0);
+    //gluOrtho2D(-BOUNDARY_X, BOUNDARY_X, -BOUNDARY_Y, BOUNDARY_Y);
+
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
+    std::string filename = "scoreBoard.txt";
+
+    std::multimap<std::string, std::string, std::greater<string>> scoreBoard;
+
+
+    std::ifstream inputFile(filename);
+
+    std::string line;
+    while (std::getline(inputFile, line)) {
+        std::istringstream iss(line);
+        std::string key, name;
+
+        if (iss >> key >> name) {
+            scoreBoard.insert({ key, name });
+        }
+    }
+
+    inputFile.close();
+
+    float i = 1;
+    displayCharacters(GLUT_BITMAP_HELVETICA_18, "SCORE BOARD", -65.0f, +30.0f);
+    for (const auto& entry : scoreBoard) {
+        std::stringstream ss;
+        ss << i;
+        std::string str = ss.str();
+        std::string displayText = str + " : " + entry.first + " : " + entry.second;
+        glColor3f(1.0f, 1.0f, 1.0f); 
+        renderText(displayText, -80.0f, 0.0f - i*30.0f);
+        i += 1;
+        if (i == 6)
+            break;
+    }
+
+    glRasterPos2f(-108, -230);
+    std::string menuPrompt = "Menu : press SPACE BAR";
+    for (char c : menuPrompt) {
         glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, c);
     }
 
@@ -570,7 +700,6 @@ void display() {
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glOrtho(-BOUNDARY_X, BOUNDARY_X, -BOUNDARY_Y, BOUNDARY_Y, -100.0, 100.0);
-    //gluOrtho2D(-BOUNDARY_X, BOUNDARY_X, -BOUNDARY_Y, BOUNDARY_Y);
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -578,17 +707,17 @@ void display() {
     if (currentState == MENU) {
         displayMenu();
     }
-    else {
+    else if((currentState == PLAYING1)||(currentState == PLAYING2)){
         // 2D draw
-        map.draw();
+        map0.draw();
 
-        colhandler(pacman, map.smallCoins);
-        if (numSmallCoins > map.smallCoins.coins.size()) {
+        colhandler(pacman, map0.smallCoins);
+        if (numSmallCoins > map0.smallCoins.coins.size()) {
             numSmallCoins--;
             score += 10;
         }
-        colhandler(pacman, map.bigCoins);
-        if (numBigCoins > map.bigCoins.coins.size()) {
+        colhandler(pacman, map0.bigCoins);
+        if (numBigCoins > map0.bigCoins.coins.size()) {
             numBigCoins--;
             score += 50;
 
@@ -601,22 +730,6 @@ void display() {
                 }
             }
         }
-        /*
-        if (numSmallCoins == 0 && numBigCoins == 0) {
-            currentState = static_cast<GameState>(static_cast<int>(currentState) + 1);
-            initialize();
-            revival();
-        }
-        */
-
-        if (blinky.getState() == Ghost::STATE::CHASE)
-            displayCharacters(GLUT_BITMAP_HELVETICA_18, "key 1: change ghost's state (Chase)", -270, -340);
-        else if (blinky.getState() == Ghost::STATE::SCATTER)
-            displayCharacters(GLUT_BITMAP_HELVETICA_18, "key 1: change ghost's state (Scatter)", -270, -340);
-        else if (blinky.getState() == Ghost::STATE::FRIGHTENED)
-            displayCharacters(GLUT_BITMAP_HELVETICA_18, "key 2: change ghost's state (Frightened)", -270, -340);
-        else if (blinky.getState() == Ghost::STATE::EATEN)
-            displayCharacters(GLUT_BITMAP_HELVETICA_18, "key 2: change ghost's state (Eaten)", -270, -340);
 
         // 3D draw
         glEnable(GL_DEPTH_TEST);
@@ -625,7 +738,7 @@ void display() {
 
         light.draw();
 
-        map.drawCoins();
+        map0.drawCoins();
         pacman.draw();
         for (auto ghost : Ghosts) {
             ghost->draw();
@@ -655,8 +768,8 @@ void display() {
 
         // draw text
         glColor3f(1.0f, 1.0f, 1.0f);
-        std::string name = "HIGH SCORE";                            // High score print
-        glRasterPos2f(-40, 350);
+        std::string name = "PAC-MAN";                            // High score print
+        glRasterPos2f(-33, 350);
         for (int i = 0; i < name.size(); i++)
             glutBitmapCharacter(GLUT_BITMAP_9_BY_15, name[i]);
 
@@ -671,8 +784,16 @@ void display() {
         // stage clear && game over
         if (displayStageClear) {
             int elapsed = eTime - stageClearTime;
-            displayCharacters(GLUT_BITMAP_HELVETICA_18, "STAGE CLEAR!", -60, 0);
-            if (elapsed > 5000) { // 5 seconds
+            displayCharacters(GLUT_BITMAP_HELVETICA_18, "STAGE CLEAR!", -65, 23);
+            if (currentState == PLAYING2) {
+                glRasterPos2f(-52, -3);
+                std::string startPrompt = "Click to END";
+                for (char c : startPrompt) {
+                    glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, c);
+                }
+                currentState = static_cast<GameState>(static_cast<int>(currentState) + 1);
+            }
+            else if (elapsed > 5000) { // 5 seconds
                 displayStageClear = false;
                 currentState = static_cast<GameState>(static_cast<int>(currentState) + 1);
                 initialize();
@@ -681,12 +802,7 @@ void display() {
             }
         }
         else if (displayGameOver) {
-            int elapsed = eTime - gameOverTime;
-            std::cout << elapsed << std::endl;
-            displayCharacters(GLUT_BITMAP_HELVETICA_18, "GAME OVER", -60, 0);
-            if (elapsed > 5000) { // 5 seconds
-                exit(0); // Game over, exit to menu or close window
-            }
+            displayCharacters(GLUT_BITMAP_HELVETICA_18, "GAME OVER", -55, 23);
         }
         else {
             if (numSmallCoins == 0 && numBigCoins == 0 && !displayStageClear) {
@@ -699,29 +815,75 @@ void display() {
 
         glutSwapBuffers();
     }
+    else if(currentState ==GETNAME) {
+        displayNameInput();
+        glutTimerFunc(100, timer, 0);
+    }
+    else {
+        displayScoreBoard();
+    }
 }
 
 void keyboardDown(unsigned char key, int x, int y) {
-    switch (key)
-    {
-    case 27:
-        exit(0);
-    case '1':
-        for (auto ghost : Ghosts) {
-            if ((ghost->getState() == Ghost::STATE::CHASE) || (ghost->getState() == Ghost::STATE::SCATTER)) {
-                ghost->saveState();
-                ghost->setState(Ghost::STATE::FRIGHTENED); //Frightened로 바뀔 때, 이전 상태를 저장, state 전환, 흘러간 시간을 pTime에 저장, dTime 초기화
-                ghost->setpTime(eTime - ghost->getdTime());
-                ghost->setdTime(eTime);
+    
+    if ((currentState == MENU)) {
+        switch (key)
+        {
+        case 27:
+            exit(0);
+        case 's':
+            currentState = SCOREBOARD;
+            break;
+        case 13: // ENTER
+            currentState = PLAYING1;
+            pacman.setCollided(false);
+            score = 0;
+
+            stageClearTime = 0;
+            gameOverTime = 0;
+            displayStageClear = false;
+            displayGameOver = false;
+            userInput ="";
+            cursorVisible = true;
+            lastTime = 0;
+            
+            Life = 2;
+            initialize();
+            revival();
+            break;
+        default:
+            break;
+        }
+    }
+    else if (currentState == GETNAME) {
+        if (key == 8) {
+            if (!userInput.empty()) {
+                userInput.pop_back();
             }
         }
-    case 13: // ENTER
-        if (currentState == MENU) {
-            currentState = PLAYING1;
-            initialize();
+        else if (key == 13) {
+            std::cout << "Final Input: " << userInput << std::endl;
+            ofstream scoreBoard("scoreBoard.txt", ios::app);
+            std::ostringstream oss;
+            oss << std::setw(6) << std::setfill('0') << score;
+            std::string scoreString = oss.str();
+            scoreBoard << scoreString + ' ' + userInput << endl;
+            scoreBoard.close();
+            userInput.clear();
+            currentState = static_cast<GameState>(static_cast<int>(currentState) + 1);
         }
-    default:
-        break;
+        else if (key >= 32 && key <= 126) {
+            userInput += key;
+        }
+    }
+    else {
+        if (key == 13) {
+            exit(0);
+        }
+        else if (key == ' ') {
+
+            currentState = MENU;
+        }
     }
 
     glutPostRedisplay();
